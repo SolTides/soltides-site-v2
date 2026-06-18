@@ -473,3 +473,63 @@ nav{
   .receipt-row strong { display: block; margin-top: 6px; }
 }
 
+
+
+/* === Unified product image display fix ===
+   All product images still come from the sheet/Cloudinary via imageSrc(product).
+   These rules only control how those same images are displayed in each site area. */
+.product-image img,
+.main-product-img img,
+.hero-card img,
+.cart-item img,
+.site-menu-product img {
+  object-fit: contain !important;
+  object-position: center center !important;
+  image-rendering: auto;
+}
+
+.site-menu-product{
+  grid-template-columns:74px 1fr !important;
+  gap:14px !important;
+}
+
+.site-menu-product img{
+  width:68px !important;
+  height:96px !important;
+  display:block !important;
+  padding:0 !important;
+  border-radius:12px !important;
+  background:#050504 !important;
+  border:1px solid rgba(196,154,74,.18) !important;
+  box-shadow:0 10px 22px rgba(0,0,0,.38) !important;
+}
+
+.cart-item{
+  grid-template-columns:86px 1fr 40px !important;
+}
+
+.cart-item img{
+  width:80px !important;
+  height:112px !important;
+  padding:0 !important;
+  border-radius:12px !important;
+  background:#050504 !important;
+  border:1px solid rgba(196,154,74,.14) !important;
+}
+
+@media(max-width:640px){
+  .site-menu-product{
+    grid-template-columns:66px 1fr !important;
+  }
+  .site-menu-product img{
+    width:60px !important;
+    height:84px !important;
+  }
+  .cart-item{
+    grid-template-columns:72px 1fr 34px !important;
+  }
+  .cart-item img{
+    width:66px !important;
+    height:92px !important;
+  }
+}
