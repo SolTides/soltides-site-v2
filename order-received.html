@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Received | SolTides</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body data-path-prefix="">
+  <header>
+    <nav>
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><img src="assets/soltides-header-mark.png?v=9" alt=""></span><span>SOLTIDES</span></a>
+      <ul class="nav-links"><li><a href="index.html#products">Products</a></li><li><a href="account.html">Account</a></li><li><a href="index.html#contact">Contact</a></li></ul>
+      <a class="cart-btn" href="index.html">Store</a>
+    </nav>
+  </header>
+
+  <main class="receipt-shell">
+    <section class="receipt-card">
+      <div class="receipt-check">✓</div>
+      <div class="eyebrow">ORDER RECEIVED</div>
+      <h1>Thank you. Your order was received.</h1>
+      <p id="receiptIntro">Your payment instructions have been sent by email. Please send the Bitcoin amount due to the address listed in your confirmation.</p>
+
+      <div class="receipt-details" id="receiptDetails"></div>
+
+      <div class="receipt-actions">
+        <a class="btn btn-primary" href="index.html#products">Continue Shopping</a>
+        <a class="btn btn-secondary" href="account.html">View Account</a>
+      </div>
+      <p class="small-note">Use your order number if you need to contact SolTides about this order.</p>
+    </section>
+  </main>
+
+  <script>
+    function esc(value) {
+      return String(value ?? "").replace(/[&<>'"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[ch]));
+    }
+    function money(value) {
+      const n = Number(value || 0);
+      return n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+    const params = new URLSearchParams(location.search);
+    const orderFromUrl = params.get("order") || "";
+    let order = null;
+    try { order = JSON.parse(localStorage.getItem("soltides_last_order") || "null"); } catch (_) {}
+    const number = order?.order_number || orderFromUrl || "Your order";
+    const items = (order?.items || []).map(i => `${i.qty} × ${i.name} — $${money(i.lineTotal)}`).join("\n");
+    document.getElementById("receiptDetails").innerHTML = `
+      <div class="receipt-row"><span>Order Number</span><strong>${esc(number)}</strong></div>
+      ${order?.total_usd ? `<div class="receipt-row"><span>Total</span><strong>$${money(order.total_usd)}</strong></div>` : ""}
+      ${order?.total_btc ? `<div class="receipt-row"><span>Bitcoin Amount Due</span><strong>${esc(order.total_btc)} BTC</strong></div>` : ""}
+      ${order?.bitcoin_address ? `<div class="receipt-address"><span>Bitcoin Address</span><code>${esc(order.bitcoin_address)}</code></div>` : ""}
+      ${items ? `<div class="receipt-items"><span>Items</span><pre>${esc(items)}</pre></div>` : ""}
+      ${order?.email_sent === false ? `<div class="receipt-warning">Order saved, but the email confirmation may not have sent. Please save this page and contact info@soltides.co with your order number.</div>` : ""}
+    `;
+  </script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account | SolTides</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body data-path-prefix="">
+  <header>
+    <nav>
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><img src="assets/soltides-header-mark.png?v=9" alt=""></span><span>SOLTIDES</span></a>
+      <ul class="nav-links"><li><a href="index.html#products">Products</a></li><li><a href="account.html">Account</a></li><li><a href="index.html#contact">Contact</a></li></ul>
+      <a class="cart-btn" href="index.html">Store</a>
+    </nav>
+  </header>
+
+  <main class="account-shell">
+    <section class="account-hero">
+      <div class="eyebrow">SOLTIDES ACCOUNT</div>
+      <h1>Customer Account</h1>
+      <p>Sign in to save shipping information, speed up checkout, and view account order history.</p>
+    </section>
+
+    <section class="account-auth-grid" id="signedOutPanel">
+      <article class="account-card">
+        <h2>Sign In</h2>
+        <form id="loginForm">
+          <label for="loginEmail">Email</label>
+          <input id="loginEmail" type="email" autocomplete="email" required>
+          <label for="loginPassword">Password</label>
+          <input id="loginPassword" type="password" autocomplete="current-password" required>
+          <button class="btn btn-primary" type="submit" style="width:100%;">Sign In</button>
+        </form>
+        <div id="loginMessage" class="account-message"></div>
+      </article>
+
+      <article class="account-card">
+        <h2>Create Account</h2>
+        <form id="signupForm">
+          <label for="signupEmail">Email</label>
+          <input id="signupEmail" type="email" autocomplete="email" required>
+          <label for="signupPassword">Password</label>
+          <input id="signupPassword" type="password" autocomplete="new-password" minlength="6" required>
+          <button class="btn btn-secondary" type="submit" style="width:100%;">Create Account</button>
+        </form>
+        <div id="signupMessage" class="account-message"></div>
+      </article>
+    </section>
+
+    <section class="account-card" id="signedInPanel" style="display:none;">
+      <div class="account-topline">
+        <div>
+          <h2>Saved Shipping</h2>
+          <p class="muted">Signed in as <strong id="accountEmail"></strong></p>
+        </div>
+        <button id="signOutButton" class="btn btn-secondary" type="button">Sign Out</button>
+      </div>
+
+      <form id="profileForm" class="account-profile-grid">
+        <div><label for="profileName">Full Name</label><input id="profileName" autocomplete="name"></div>
+        <div><label for="profilePhone">Phone</label><input id="profilePhone" autocomplete="tel"></div>
+        <div><label for="shippingName">Shipping Name</label><input id="shippingName" autocomplete="name"></div>
+        <div><label for="shippingAddress">Street Address</label><input id="shippingAddress" autocomplete="street-address"></div>
+        <div><label for="shippingCity">City</label><input id="shippingCity" autocomplete="address-level2"></div>
+        <div><label for="shippingState">State</label><input id="shippingState" autocomplete="address-level1" maxlength="2" placeholder="TX"></div>
+        <div><label for="shippingZip">ZIP</label><input id="shippingZip" autocomplete="postal-code"></div>
+        <button class="btn btn-primary" type="submit">Save Shipping</button>
+      </form>
+      <div id="profileMessage" class="account-message"></div>
+
+      <div class="account-orders-head">
+        <h2>Order History</h2>
+        <button id="refreshOrdersButton" class="btn btn-secondary" type="button">Refresh</button>
+      </div>
+      <div id="orderHistory"></div>
+    </section>
+  </main>
+
+  <script type="module" src="assets/js/account.js?v=1"></script>
+</body>
+</html>

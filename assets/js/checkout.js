@@ -2,6 +2,7 @@ import { CONFIG } from "./config.js";
 import { state, saveCart } from "./state.js";
 import { calcTotal, closeCart, getCartLines, updateCart } from "./cart.js";
 import { stockNumber } from "./products.js";
+import { fillCheckoutFields, getAccessToken, getCurrentUser, getProfile } from "./auth.js";
 
 export async function fetchBTC() {
   const rate = document.getElementById("btcRate");
@@ -42,6 +43,38 @@ function shippingAddress() {
   return `${street}\n${city}, ${stateVal} ${zip}`.trim();
 }
 
+function orderReceivedUrl(orderNumber) {
+  const prefix = document.body.dataset.pathPrefix || "";
+  return `${prefix}order-received.html?order=${encodeURIComponent(orderNumber || "")}`;
+}
+
+export async function initCheckoutAccount() {
+  const form = document.getElementById("checkoutForm");
+  if (!form || document.getElementById("checkoutAccountBox")) return;
+
+  const grid = form.querySelector(".checkout-grid");
+  const box = document.createElement("div");
+  box.id = "checkoutAccountBox";
+  box.className = "checkout-account-box";
+  grid?.insertAdjacentElement("beforebegin", box);
+
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      box.innerHTML = `<strong>Have an account?</strong><span> Sign in to use saved shipping. Guest checkout still works.</span> <a href="${state.pathPrefix}account.html">Account Login</a>`;
+      return;
+    }
+    const profile = await getProfile();
+    fillCheckoutFields(profile, user);
+    box.innerHTML = `
+      <div><strong>Signed in as ${user.email}</strong><br><span class="small-note">Saved shipping will prefill when available. You can still edit it before ordering.</span></div>
+      <label class="checkout-save-label"><input id="saveShippingInfo" type="checkbox" checked> Save this shipping info to my account</label>`;
+  } catch (error) {
+    console.warn("Checkout account load failed", error);
+    box.innerHTML = `<strong>Account optional.</strong><span> Guest checkout still works.</span> <a href="${state.pathPrefix}account.html">Account Login</a>`;
+  }
+}
+
 export async function submitOrder() {
   if (state.cart.length === 0) { alert("Your cart is empty."); return; }
   if (!state.btcUsd) { alert("BTC rate is still loading. Please wait a moment and try again."); return; }
@@ -74,9 +107,12 @@ export async function submitOrder() {
   }
 
   const orderBtn = document.getElementById("orderButton");
-  if (orderBtn) { orderBtn.disabled = true; orderBtn.textContent = "Sending order..."; }
+  if (orderBtn) { orderBtn.disabled = true; orderBtn.textContent = "Submitting order..."; }
 
   try {
+    const authToken = await getAccessToken().catch(() => null);
+    const saveShipping = Boolean(document.getElementById("saveShippingInfo")?.checked);
+    const cartLines = getCartLines();
     const clientPreview = {
       total_usd: Number(calcTotal().toFixed(2)),
       btc_usd_rate: Number(state.btcUsd)
@@ -84,8 +120,10 @@ export async function submitOrder() {
     const payload = {
       customer,
       order_notes: orderNotes,
-      cart: getCartLines().map(line => ({ id: line.id, mgLabel: line.mgLabel, qty: line.qty })),
-      client_preview: clientPreview
+      cart: cartLines.map(line => ({ id: line.id, mgLabel: line.mgLabel, qty: line.qty })),
+      client_preview: clientPreview,
+      auth_token: authToken,
+      save_shipping: saveShipping
     };
 
     const res = await fetch(CONFIG.orderEndpoint, {
@@ -96,12 +134,25 @@ export async function submitOrder() {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || "Order could not be submitted.");
 
-    alert(`Order received. Your order number is ${data.order_number}. Please check your email for payment instructions.${data.email_sent ? "" : " Note: the order was saved, but the email did not confirm."}`);
+    const lastOrder = {
+      order_number: data.order_number,
+      order_id: data.order_id,
+      customer,
+      order_notes: orderNotes,
+      items: cartLines,
+      total_usd: data.total_usd,
+      total_btc: data.total_btc,
+      bitcoin_address: data.bitcoin_address,
+      email_sent: data.email_sent
+    };
+    localStorage.setItem("soltides_last_order", JSON.stringify(lastOrder));
+
     state.cart = [];
     saveCart();
     updateCart();
     closeCart();
     document.getElementById("checkoutForm")?.reset();
+    window.location.href = orderReceivedUrl(data.order_number);
   } catch (err) {
     console.error(err);
     alert(err.message || "Order did not send. Please email info@soltides.co or try again.");

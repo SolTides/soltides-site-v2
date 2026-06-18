@@ -1,5 +1,5 @@
 const { json, readJson } = require("./lib/http");
-const { supabaseFetch } = require("./lib/supabase-rest");
+const { SUPABASE_URL, SUPABASE_WRITE_KEY, supabaseFetch } = require("./lib/supabase-rest");
 const { loadCatalog, isAvailable, stockNumber, money } = require("./lib/catalog");
 const { fetchBtcUsd } = require("./lib/btc");
 
@@ -10,6 +10,40 @@ const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID || "service_sh9fwlv";
 const EMAILJS_ORDER_TEMPLATE_ID = process.env.EMAILJS_ORDER_TEMPLATE_ID || "template_lq0eiz6";
 
 function required(value) { return String(value || "").trim(); }
+
+
+async function userFromToken(token) {
+  const clean = required(token);
+  if (!clean) return null;
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    headers: {
+      apikey: SUPABASE_WRITE_KEY,
+      Authorization: `Bearer ${clean}`
+    }
+  });
+  if (!res.ok) return null;
+  return await res.json();
+}
+
+async function saveProfileForUser(user, customer) {
+  if (!user?.id) return;
+  await supabaseFetch("profiles", {
+    method: "POST",
+    write: true,
+    prefer: "resolution=merge-duplicates,return=minimal",
+    body: {
+      user_id: user.id,
+      email: user.email,
+      full_name: customer.name,
+      phone: customer.phone,
+      default_shipping_name: customer.name,
+      default_shipping_address: customer.street,
+      default_shipping_city: customer.city,
+      default_shipping_state: customer.state,
+      default_shipping_zip: customer.zip
+    }
+  });
+}
 
 function buildProductDetails(lines) {
   return lines.map(line => `${line.name}\nQuantity: ${line.qty} ${line.qty === 1 ? "vial" : "vials"}\nUnit Price: $${money(line.unitPrice)}\nLine Total: $${money(line.lineTotal)}`).join("\n\n");
@@ -67,6 +101,8 @@ exports.handler = async function handler(event) {
       return json(400, { error: "Your cart is empty." });
     }
 
+    const authUser = await userFromToken(body.auth_token);
+
     const catalog = await loadCatalog();
     const byId = new Map(catalog.map(p => [p.id || p.slug, p]));
     const totalQtyByProduct = new Map();
@@ -122,6 +158,7 @@ exports.handler = async function handler(event) {
       prefer: "return=representation",
       body: {
         order_number: orderNumber,
+        user_id: authUser?.id || null,
         customer_email: email,
         customer_name: name,
         customer_phone: phone,
@@ -151,6 +188,10 @@ exports.handler = async function handler(event) {
           line_total: Number(line.lineTotal.toFixed(2))
         }))
       });
+    }
+
+    if (authUser?.id && body.save_shipping) {
+      await saveProfileForUser(authUser, { name, email, phone, street, city, state, zip });
     }
 
     const firstLine = lines[0] || { name: "", qty: "", unitPrice: 0, lineTotal: 0 };

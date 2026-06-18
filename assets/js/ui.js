@@ -139,6 +139,9 @@ export function renderSiteMenu() {
         </div>
       </div>
       <div class="site-menu-section">
+        <a class="site-menu-link" href="${state.pathPrefix}account.html" onclick="closeSiteMenu()"><span>Account</span><span>›</span></a>
+      </div>
+      <div class="site-menu-section">
         <a class="site-menu-link" href="${state.pathPrefix}index.html#contact" onclick="closeSiteMenu()"><span>Contact</span><span>›</span></a>
       </div>
     </aside>`;

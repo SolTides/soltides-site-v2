@@ -1,7 +1,7 @@
 import { initState } from "./state.js";
 import { loadProducts } from "./products.js";
 import { addToCart, changeQty, closeCart, openCart, removeFromCart, updateCart } from "./cart.js";
-import { fetchBTC, submitOrder } from "./checkout.js";
+import { fetchBTC, initCheckoutAccount, submitOrder } from "./checkout.js";
 import { addSelectedProduct, handleContact, openSiteMenu, closeSiteMenu, renderProductPage, renderProductsGrid, renderSiteMenu, toggleAccordion, toggleSiteProductsMenu } from "./ui.js";
 
 function exposeGlobals() {
@@ -30,6 +30,7 @@ async function boot() {
   renderProductPage();
   updateCart();
   fetchBTC();
+  initCheckoutAccount();
 }
 
 document.addEventListener("DOMContentLoaded", boot);
