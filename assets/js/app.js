@@ -1,7 +1,7 @@
 import { initState } from "./state.js";
 import { loadProducts } from "./products.js";
 import { addToCart, changeQty, closeCart, openCart, removeFromCart, updateCart } from "./cart.js";
-import { fetchBTC, initCheckoutAccount, submitOrder } from "./checkout.js";
+import { fetchBTC, initCheckoutAccount, submitOrder } from "./checkout.js?v=email-fallback-1";
 import { addSelectedProduct, handleContact, openSiteMenu, closeSiteMenu, renderHeroProductImage, renderProductPage, renderProductsGrid, renderSiteMenu, toggleAccordion, toggleSiteProductsMenu } from "./ui.js";
 
 function exposeGlobals() {

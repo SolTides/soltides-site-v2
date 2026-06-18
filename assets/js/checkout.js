@@ -2,6 +2,7 @@ import { CONFIG } from "./config.js";
 import { state, saveCart } from "./state.js";
 import { calcTotal, closeCart, getCartLines, updateCart } from "./cart.js";
 import { stockNumber } from "./products.js";
+import { money } from "./utils.js";
 import { fillCheckoutFields, getAccessToken, getCurrentUser, getProfile } from "./auth.js";
 
 export async function fetchBTC() {
@@ -47,6 +48,95 @@ function orderReceivedUrl(orderNumber) {
   const prefix = document.body.dataset.pathPrefix || "";
   return `${prefix}order-received.html?order=${encodeURIComponent(orderNumber || "")}`;
 }
+
+function buildProductDetails(lines) {
+  return lines.map(line => `${line.name}\nQuantity: ${line.qty} ${line.qty === 1 ? "vial" : "vials"}\nUnit Price: $${money(line.unitPrice)}\nLine Total: $${money(line.lineTotal)}`).join("\n\n");
+}
+
+function buildProductDetailsInline(lines) {
+  return lines.map(line => `${line.name} × ${line.qty} = $${money(line.lineTotal)}`).join(" | ");
+}
+
+function buildProductHtmlRows(lines) {
+  return lines.map(line => `<tr><td style="padding:8px 0;border-bottom:1px solid #555;">${line.name}<br><span style="color:#999;">Qty: ${line.qty} • $${money(line.unitPrice)} each</span></td><td style="padding:8px 0;border-bottom:1px solid #555;text-align:right;">$${money(line.lineTotal)}</td></tr>`).join("");
+}
+
+async function sendClientOrderEmail({ data, customer, orderNotes, cartLines }) {
+  if (!window.emailjs || !CONFIG.emailjsPublicKey || !CONFIG.emailjsServiceId || !CONFIG.emailjsOrderTemplateId) {
+    console.warn("EmailJS browser SDK is not available.");
+    return false;
+  }
+
+  try {
+    if (!window.__soltidesEmailJsReady) {
+      window.emailjs.init({ publicKey: CONFIG.emailjsPublicKey });
+      window.__soltidesEmailJsReady = true;
+    }
+
+    const orderNumber = data.order_number || "";
+    const totalUsd = Number(data.total_usd || calcTotal() || 0);
+    const totalBtc = String(data.total_btc || "");
+    const orderDate = new Date().toLocaleString("en-US", { timeZone: "America/Chicago" });
+    const productDetails = buildProductDetails(cartLines);
+    const productDetailsInline = buildProductDetailsInline(cartLines);
+    const productHtmlRows = buildProductHtmlRows(cartLines);
+    const firstLine = cartLines[0] || { qty: "", lineTotal: totalUsd };
+
+    const params = {
+      to_email: customer.email,
+      email: customer.email,
+      customer_email: customer.email,
+      customer_name: customer.name,
+      customer_phone: customer.phone,
+      customer_address: customer.address,
+      customer_city: customer.city,
+      customer_state: customer.state,
+      customer_zip: customer.zip,
+      order_number: orderNumber,
+      order_id: orderNumber,
+      order_date: orderDate,
+      product_details: productDetails,
+      ordered_items: productDetails,
+      items_ordered: productDetails,
+      order_items: productDetails,
+      cart_items: productDetails,
+      items: productDetailsInline,
+      item_summary: productDetailsInline,
+      product_summary: productDetailsInline,
+      product_rows: productHtmlRows,
+      items_html: productHtmlRows,
+      order_items_html: productHtmlRows,
+      cart_items_html: productHtmlRows,
+      product_name: productDetailsInline,
+      item_name: productDetailsInline,
+      item_description: productDetailsInline,
+      quantity: firstLine.qty,
+      item_quantity: firstLine.qty,
+      item_price: money(firstLine.lineTotal || totalUsd),
+      price: money(firstLine.lineTotal || totalUsd),
+      item_total: money(firstLine.lineTotal || totalUsd),
+      line_total: money(firstLine.lineTotal || totalUsd),
+      total_usd: money(totalUsd),
+      total_btc: totalBtc,
+      bitcoin_address: data.bitcoin_address || CONFIG.btcAddress,
+      owner_email: CONFIG.ownerEmail,
+      order_notes: orderNotes,
+      customer_notes: orderNotes,
+      customer_note: orderNotes,
+      notes: orderNotes,
+      orderNote: orderNotes,
+      special_instructions: orderNotes,
+      customer_message: orderNotes
+    };
+
+    await window.emailjs.send(CONFIG.emailjsServiceId, CONFIG.emailjsOrderTemplateId, params);
+    return true;
+  } catch (error) {
+    console.warn("EmailJS browser fallback failed", error);
+    return false;
+  }
+}
+
 
 export async function initCheckoutAccount() {
   const form = document.getElementById("checkoutForm");
@@ -134,6 +224,11 @@ export async function submitOrder() {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || "Order could not be submitted.");
 
+    let emailSent = Boolean(data.email_sent);
+    if (!emailSent) {
+      emailSent = await sendClientOrderEmail({ data, customer, orderNotes, cartLines });
+    }
+
     const lastOrder = {
       order_number: data.order_number,
       order_id: data.order_id,
@@ -143,7 +238,7 @@ export async function submitOrder() {
       total_usd: data.total_usd,
       total_btc: data.total_btc,
       bitcoin_address: data.bitcoin_address,
-      email_sent: data.email_sent
+      email_sent: emailSent
     };
     localStorage.setItem("soltides_last_order", JSON.stringify(lastOrder));
 
@@ -152,6 +247,9 @@ export async function submitOrder() {
     updateCart();
     closeCart();
     document.getElementById("checkoutForm")?.reset();
+    if (!emailSent) {
+      alert(`Order was saved, but the confirmation email did not send automatically. Your order number is ${data.order_number}. Please save this page or email info@soltides.co.`);
+    }
     window.location.href = orderReceivedUrl(data.order_number);
   } catch (err) {
     console.error(err);
