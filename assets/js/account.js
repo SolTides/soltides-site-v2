@@ -68,16 +68,16 @@ function orderCard(order) {
 async function loadOrders() {
   const box = $("orderHistory");
   if (!box) return;
-  box.innerHTML = "<p class='muted'>Loading orders...</p>";
+  box.innerHTML = "<p class='muted'>Loading order history...</p>";
   try {
     const orders = await fetchMyOrders();
     if (!orders.length) {
-      box.innerHTML = "<p class='muted'>No account orders yet.</p>";
+      box.innerHTML = "<p class='muted'>No account orders yet. Guest orders placed before signing in may not appear here.</p>";
       return;
     }
     box.innerHTML = orders.map(orderCard).join("");
   } catch (error) {
-    box.innerHTML = `<p class='muted'>${esc(error.message || "Could not load orders.")}</p>`;
+    box.innerHTML = `<p class='muted'>${esc(error.message || "Could not load order history.")}</p>`;
   }
 }
 
@@ -113,7 +113,7 @@ $("signupForm")?.addEventListener("submit", async event => {
     const password = $("signupPassword").value;
     if (password.length < 6) throw new Error("Password must be at least 6 characters.");
     await signUp($("signupEmail").value.trim(), password);
-    showMessage("signupMessage", "Account created. Check your email if confirmation is required before logging in.", "success");
+    showMessage("signupMessage", "Account created. Check your inbox to confirm your email before logging in.", "success");
   } catch (error) {
     showMessage("signupMessage", error.message || "Could not create account.", "error");
   }
@@ -124,7 +124,7 @@ $("profileForm")?.addEventListener("submit", async event => {
   showMessage("profileMessage", "Saving...");
   try {
     await saveProfile(profileFromForm());
-    showMessage("profileMessage", "Shipping information saved.", "success");
+    showMessage("profileMessage", "Saved shipping information.", "success");
   } catch (error) {
     showMessage("profileMessage", error.message || "Could not save profile.", "error");
   }

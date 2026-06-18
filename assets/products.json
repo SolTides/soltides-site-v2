@@ -8,17 +8,17 @@
     "price": 200,
     "image": "slp-3.png",
     "lab": "slp-3-labs.png",
-    "summary": "60mg lyophilized research compound in a sealed 3mL vial.",
+    "summary": "Retatrutide research compound supplied in a 60mg lyophilized 3mL vial.",
     "mg_options": [
       {
         "label": "60mg",
         "price": 200
       }
     ],
-    "overview": "SolTides SLP-3 listing for Retatrutide. Supplied lyophilized in a sealed 3mL vial for laboratory research use only.",
-    "specs": "Catalog: SLP-3. Compound: Retatrutide. Amount: 60mg. Vial: 3mL. Form: lyophilized research compound.",
-    "storage": "Store sealed in a cool, dry, light-protected location. Avoid heat, sunlight, moisture, and repeated temperature changes.",
-    "quality": "Lot-specific testing documentation will be posted when available."
+    "overview": "SLP-3 is Retatrutide supplied by SolTides for controlled laboratory research use only. This listing is for a 60mg lyophilized 3mL vial.",
+    "specs": "Catalog: SLP-3. Compound: Retatrutide. Amount: 60mg. Format: lyophilized 3mL vial. Intended use: laboratory research only.",
+    "storage": "Store sealed in a cool, dry, light-protected environment. Avoid heat, direct sunlight, and moisture.",
+    "quality": "Lot-specific testing documentation will be shown in the Lab Results section when available."
   },
   {
     "id": "slp-2",
@@ -29,17 +29,17 @@
     "price": 65,
     "image": "slp-2.png",
     "lab": "slp-2-labs.png",
-    "summary": "15mg lyophilized research peptide in a sealed 3mL vial.",
+    "summary": "Tirzepatide research peptide supplied in a 15mg lyophilized 3mL vial.",
     "mg_options": [
       {
         "label": "15mg",
         "price": 65
       }
     ],
-    "overview": "SolTides SLP-2 listing for Tirzepatide. Supplied lyophilized in a sealed 3mL vial for laboratory research use only.",
-    "specs": "Catalog: SLP-2. Peptide: Tirzepatide. Amount: 15mg. Vial: 3mL. Form: lyophilized research peptide.",
-    "storage": "Store sealed in a cool, dry, light-protected location. Avoid heat, sunlight, moisture, and unnecessary handling.",
-    "quality": "Lot-specific testing documentation will be posted when available."
+    "overview": "SLP-2 is Tirzepatide supplied by SolTides for controlled laboratory research use only. This listing is for a 15mg lyophilized 3mL vial.",
+    "specs": "Catalog: SLP-2. Compound: Tirzepatide. Amount: 15mg. Format: lyophilized 3mL vial. Intended use: laboratory research only.",
+    "storage": "Store sealed in a cool, dry, light-protected environment. Avoid heat, direct sunlight, and moisture.",
+    "quality": "Lot-specific testing documentation will be shown in the Lab Results section when available."
   },
   {
     "id": "tesamorelin",
@@ -50,17 +50,17 @@
     "price": 50,
     "image": "tesamorelin.png",
     "lab": "tesamorelin-labs.png",
-    "summary": "10mg lyophilized research peptide in a sealed 3mL vial.",
+    "summary": "Tesamorelin research peptide supplied in a 10mg lyophilized 3mL vial.",
     "mg_options": [
       {
         "label": "10mg",
         "price": 50
       }
     ],
-    "overview": "Tesamorelin supplied by SolTides as a lyophilized research peptide for laboratory use only.",
-    "specs": "Peptide: Tesamorelin. Amount: 10mg. Vial: 3mL. Form: lyophilized research peptide.",
-    "storage": "Store sealed in a cool, dry, light-protected location. Avoid heat, sunlight, and moisture.",
-    "quality": "Lot-specific testing documentation will be posted when available."
+    "overview": "Tesamorelin is supplied by SolTides for controlled laboratory research use only. This listing is for a 10mg lyophilized 3mL vial.",
+    "specs": "Compound: Tesamorelin. Amount: 10mg. Format: lyophilized 3mL vial. Intended use: laboratory research only.",
+    "storage": "Store sealed in a cool, dry, light-protected environment. Avoid heat, direct sunlight, and moisture.",
+    "quality": "Lot-specific testing documentation will be shown in the Lab Results section when available."
   },
   {
     "id": "klow-blend",
@@ -71,17 +71,17 @@
     "price": 90,
     "image": "klow-blend.png",
     "lab": "klow-blend-labs.png",
-    "summary": "Multi-component lyophilized research blend in a sealed 3mL vial.",
+    "summary": "Multi-component research blend supplied in a lyophilized 3mL vial.",
     "mg_options": [
       {
         "label": "50mg / 10mg / 10mg / 10mg",
         "price": 90
       }
     ],
-    "overview": "Klow Blend is a SolTides multi-component research blend. Component amounts are listed on the product label and order summary.",
-    "specs": "Catalog: Klow Blend. Amount: 50mg / 10mg / 10mg / 10mg. Vial: 3mL. Form: lyophilized research blend.",
-    "storage": "Store sealed in a cool, dry, light-protected location. Avoid heat, sunlight, moisture, and unnecessary handling.",
-    "quality": "Lot-specific testing documentation will be posted when available."
+    "overview": "Klow Blend is a multi-component SolTides research blend supplied for controlled laboratory research use only.",
+    "specs": "Catalog: Klow Blend. Listed amount: 50mg / 10mg / 10mg / 10mg. Format: lyophilized 3mL vial. Intended use: laboratory research only.",
+    "storage": "Store sealed in a cool, dry, light-protected environment. Avoid heat, direct sunlight, and moisture.",
+    "quality": "Lot-specific testing documentation will be shown in the Lab Results section when available."
   },
   {
     "id": "bpc-157-tb-500",
@@ -92,17 +92,17 @@
     "price": 80,
     "image": "bpc-157-tb-500.png",
     "lab": "bpc-157-tb-500-labs.png",
-    "summary": "10mg / 10mg lyophilized research blend in a sealed 3mL vial.",
+    "summary": "BPC-157 + TB-500 research blend supplied in a 10mg / 10mg lyophilized 3mL vial.",
     "mg_options": [
       {
         "label": "10mg / 10mg",
         "price": 80
       }
     ],
-    "overview": "BPC-157 + TB-500 Blend is a two-component SolTides research blend supplied for laboratory research use only.",
-    "specs": "Blend: BPC-157 + TB-500. Amount: 10mg / 10mg. Vial: 3mL. Form: lyophilized research blend.",
-    "storage": "Store sealed in a cool, dry, light-protected location. Avoid heat, sunlight, moisture, and unnecessary handling.",
-    "quality": "Lot-specific testing documentation will be posted when available."
+    "overview": "BPC-157 + TB-500 Blend is supplied by SolTides for controlled laboratory research use only. This listing is for a 10mg / 10mg lyophilized 3mL vial.",
+    "specs": "Compound: BPC-157 + TB-500 Blend. Amount: 10mg / 10mg. Format: lyophilized 3mL vial. Intended use: laboratory research only.",
+    "storage": "Store sealed in a cool, dry, light-protected environment. Avoid heat, direct sunlight, and moisture.",
+    "quality": "Lot-specific testing documentation will be shown in the Lab Results section when available."
   },
   {
     "id": "mt-1",
@@ -113,16 +113,16 @@
     "price": 40,
     "image": "mt-1.png",
     "lab": "mt-1-labs.png",
-    "summary": "10mg lyophilized research peptide in a sealed 3mL vial.",
+    "summary": "Melanotan I research peptide supplied in a 10mg lyophilized 3mL vial.",
     "mg_options": [
       {
         "label": "10mg",
         "price": 40
       }
     ],
-    "overview": "SolTides MT-1 listing for Melanotan I. Supplied lyophilized in a sealed 3mL vial for laboratory research use only.",
-    "specs": "Catalog: MT-1. Peptide: Melanotan I. Amount: 10mg. Vial: 3mL. Form: lyophilized research peptide.",
-    "storage": "Store sealed in a cool, dry, light-protected location. Avoid heat, sunlight, moisture, and unnecessary handling.",
-    "quality": "Lot-specific testing documentation will be posted when available."
+    "overview": "MT-1 is Melanotan I supplied by SolTides for controlled laboratory research use only. This listing is for a 10mg lyophilized 3mL vial.",
+    "specs": "Catalog: MT-1. Compound: Melanotan I. Amount: 10mg. Format: lyophilized 3mL vial. Intended use: laboratory research only.",
+    "storage": "Store sealed in a cool, dry, light-protected environment. Avoid heat, direct sunlight, and moisture.",
+    "quality": "Lot-specific testing documentation will be shown in the Lab Results section when available."
   }
 ]

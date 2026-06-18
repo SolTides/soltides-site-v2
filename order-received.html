@@ -7,12 +7,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/main.css?v=clean1">
+  <link rel="stylesheet" href="assets/css/main.css?v=9">
 </head>
 <body data-path-prefix="">
   <header>
     <nav>
-      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><img src="assets/soltides-header-mark.png?v=clean1" alt=""></span><span>SOLTIDES</span></a>
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><img src="assets/soltides-header-mark.png?v=9" alt=""></span><span>SOLTIDES</span></a>
       <ul class="nav-links"><li><a href="index.html#products">Products</a></li><li><a href="account.html">Account</a></li><li><a href="index.html#contact">Contact</a></li></ul>
       <a class="cart-btn" href="index.html">Store</a>
     </nav>
@@ -22,8 +22,8 @@
     <section class="receipt-card">
       <div class="receipt-check">✓</div>
       <div class="eyebrow">ORDER RECEIVED</div>
-      <h1>Thank you. Your order has been received.</h1>
-      <p id="receiptIntro">Your order details are below. Bitcoin payment instructions have also been sent to your email.</p>
+      <h1>Thank you. Your order was received.</h1>
+      <p id="receiptIntro">Your payment instructions have been sent by email. Send the Bitcoin amount due to the address listed in your confirmation.</p>
 
       <div class="receipt-details" id="receiptDetails"></div>
 
@@ -31,7 +31,7 @@
         <a class="btn btn-primary" href="index.html#products">Continue Shopping</a>
         <a class="btn btn-secondary" href="account.html">View Account</a>
       </div>
-      <p class="small-note">Use your order number if you need to contact SolTides about this order.</p>
+      <p class="small-note">Use your order number if you contact SolTides about this order.</p>
     </section>
   </main>
 
@@ -55,7 +55,7 @@
       ${order?.total_btc ? `<div class="receipt-row"><span>Bitcoin Amount Due</span><strong>${esc(order.total_btc)} BTC</strong></div>` : ""}
       ${order?.bitcoin_address ? `<div class="receipt-address"><span>Bitcoin Address</span><code>${esc(order.bitcoin_address)}</code></div>` : ""}
       ${items ? `<div class="receipt-items"><span>Items</span><pre>${esc(items)}</pre></div>` : ""}
-      ${order?.email_sent === false ? `<div class="receipt-warning">Order saved, but the email confirmation may not have sent. Please save this page and contact info@soltides.co with your order number.</div>` : ""}
+      ${order?.email_sent === false ? `<div class="receipt-warning">Your order was saved. If you do not receive a confirmation email, save this page and contact info@soltides.co with your order number.</div>` : ""}
     `;
   </script>
 </body>

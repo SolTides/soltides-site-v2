@@ -168,5 +168,5 @@ export function toggleSiteProductsMenu() {
 
 export function handleContact(e) {
   e.preventDefault();
-  alert("Thanks. Please email info@soltides.co for now.");
+  alert("Thanks. Please contact info@soltides.co.");
 }

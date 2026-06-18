@@ -53,7 +53,7 @@ window.loadOrders = async function loadOrders() {
     msg.textContent = `${data.length} recent order${data.length === 1 ? "" : "s"}.`;
     grid.innerHTML = data.map(orderCard).join("");
   } catch (error) {
-    msg.textContent = `${error.message} Admin access required.`;
+    msg.textContent = `${error.message} Make sure your logged-in user is in public.admin_users.`;
   }
 };
 
