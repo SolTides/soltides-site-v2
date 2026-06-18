@@ -24,7 +24,7 @@ async function supabaseFetch(pathAndQuery, { method = "GET", body = undefined, t
   try { data = text ? JSON.parse(text) : null; } catch (_) { data = text; }
   if (!res.ok) {
     const detail = typeof data === "string" ? data : (data?.message || data?.hint || JSON.stringify(data));
-    throw new Error(`Supabase ${method} ${pathAndQuery} failed: ${res.status} ${detail}`);
+    throw new Error(`Database request failed: ${res.status} ${detail}`);
   }
   return data;
 }

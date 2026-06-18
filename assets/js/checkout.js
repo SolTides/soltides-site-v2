@@ -67,10 +67,10 @@ export async function initCheckoutAccount() {
     const profile = await getProfile();
     fillCheckoutFields(profile, user);
     box.innerHTML = `
-      <div><strong>Signed in as ${user.email}</strong><br><span class="small-note">Saved shipping will prefill when available. You can still edit it before ordering.</span></div>
+      <div><strong>Signed in as ${user.email}</strong><br><span class="small-note">Saved shipping is filled in. You can edit it before ordering.</span></div>
       <label class="checkout-save-label"><input id="saveShippingInfo" type="checkbox" checked> Save this shipping info to my account</label>`;
   } catch (error) {
-    console.warn("Checkout account load failed", error);
+    console.warn("Account information could not load", error);
     box.innerHTML = `<strong>Account optional.</strong><span> Guest checkout still works.</span> <a href="${state.pathPrefix}account.html">Account Login</a>`;
   }
 }
@@ -155,7 +155,7 @@ export async function submitOrder() {
     window.location.href = orderReceivedUrl(data.order_number);
   } catch (err) {
     console.error(err);
-    alert(err.message || "Order did not send. Please email info@soltides.co or try again.");
+    alert(err.message || "Order could not be submitted. Please try again or contact info@soltides.co.");
   } finally {
     if (orderBtn) { orderBtn.disabled = false; orderBtn.textContent = "Order"; }
   }
