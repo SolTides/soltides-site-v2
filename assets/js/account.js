@@ -113,7 +113,7 @@ $("signupForm")?.addEventListener("submit", async event => {
     const password = $("signupPassword").value;
     if (password.length < 6) throw new Error("Password must be at least 6 characters.");
     await signUp($("signupEmail").value.trim(), password);
-    showMessage("signupMessage", "Account created. Check your inbox to confirm your email before logging in.", "success");
+    showMessage("signupMessage", "Account created. If Supabase requires email confirmation, check your inbox before logging in.", "success");
   } catch (error) {
     showMessage("signupMessage", error.message || "Could not create account.", "error");
   }

@@ -3,6 +3,15 @@ import { esc, money } from "./utils.js";
 import { addToCart } from "./cart.js";
 import { currentProduct, imageSrc, labSrc, isVisible, isAvailable, stockClass, stockLabel, stockNumber, showStockCount } from "./products.js";
 
+export function renderHeroProductImage() {
+  const img = document.getElementById("heroProductImage");
+  if (!img) return;
+  const product = state.products.find(p => p.slug === "slp-3") || state.products.find(isVisible);
+  if (!product) return;
+  img.src = imageSrc(product);
+  img.alt = `SolTides ${product.code} vial`;
+}
+
 export function renderProductsGrid() {
   const grid = document.getElementById("productsGrid");
   if (!grid) return;
@@ -168,5 +177,5 @@ export function toggleSiteProductsMenu() {
 
 export function handleContact(e) {
   e.preventDefault();
-  alert("Thanks. Please contact info@soltides.co.");
+  alert("Thanks. Please email info@soltides.co for now.");
 }

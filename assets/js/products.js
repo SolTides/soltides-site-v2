@@ -2,12 +2,41 @@ import { CONFIG } from "./config.js";
 import { state, saveCart } from "./state.js";
 import { isUrl, parseCSV } from "./utils.js";
 
+function firstUrl(...values) {
+  return values.map(v => String(v || "").trim()).find(isUrl) || "";
+}
+
+function normalizeKey(key) {
+  return String(key || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+export function productImageUrl(p) {
+  return firstUrl(
+    p?.product_image_url,
+    p?.cloudinary_url,
+    p?.cloudinary_image_url,
+    p?.image_url,
+    p?.product_image,
+    p?.product_photo,
+    p?.photo_url,
+    p?.image
+  );
+}
+
 export function imageSrc(p) {
-  return isUrl(p.product_image_url) ? p.product_image_url : `${state.pathPrefix}assets/${p.image}`;
+  const cloudUrl = productImageUrl(p);
+  if (cloudUrl) return cloudUrl;
+  return `${state.pathPrefix}assets/${p.image}`;
 }
 
 export function labSrc(p) {
-  return isUrl(p.lab_image_url) ? p.lab_image_url : `${state.pathPrefix}assets/labs/${p.lab}`;
+  const url = firstUrl(p?.lab_image_url, p?.lab_url, p?.coa_url, p?.testing_url);
+  if (url) return url;
+  return `${state.pathPrefix}assets/labs/${p.lab}`;
 }
 
 export function stockNumber(p) {
@@ -85,14 +114,30 @@ async function loadSheetProducts(fallbackProducts) {
   const bySlug = new Map(fallbackProducts.map(p => [p.slug, p]));
   return rows.slice(1).map(cells => {
     const r = {};
-    headers.forEach((h, i) => r[h] = String(cells[i] ?? "").trim());
-    const base = bySlug.get(r.slug) || {};
+    headers.forEach((h, i) => {
+      const value = String(cells[i] ?? "").trim();
+      r[h] = value;
+      r[normalizeKey(h)] = value;
+    });
+    const slug = r.slug || r.product_slug || r.id;
+    const base = bySlug.get(slug) || {};
+    const productImage = firstUrl(
+      r.product_image_url,
+      r.cloudinary_url,
+      r.cloudinary_image_url,
+      r.image_url,
+      r.product_image,
+      r.product_photo,
+      r.photo_url,
+      r.image
+    );
+    const labImage = firstUrl(r.lab_image_url, r.lab_url, r.coa_url, r.testing_url);
     const price = Number(r.price || base.price || 0);
     return {
       ...base,
-      id: r.slug || base.id || base.slug,
-      slug: r.slug || base.slug,
-      code: r.product_code || base.code || r.slug,
+      id: slug || base.id || base.slug,
+      slug: slug || base.slug,
+      code: r.product_code || base.code || slug,
       actual: r.peptide_name || base.actual || "",
       spec: r.default_mg || r.mg_options || base.spec || "",
       price,
@@ -100,11 +145,11 @@ async function loadSheetProducts(fallbackProducts) {
       stock_status: r.stock_status || base.stock_status || "in_stock",
       show_stock_count: r.show_stock_count || r.show_stock || r.show_stock_amount || r.display_stock_amount || base.show_stock_count || "no",
       short_description: r.short_description || base.short_description || base.summary || "",
-      product_image_url: r.product_image_url || "",
-      lab_image_url: r.lab_image_url || "",
+      product_image_url: productImage || base.product_image_url || "",
+      lab_image_url: labImage || base.lab_image_url || "",
       visible: r.visible || "yes",
-      image: base.image || `${r.slug}.png`,
-      lab: base.lab || `${r.slug}-labs.png`,
+      image: base.image || `${slug}.png`,
+      lab: base.lab || `${slug}-labs.png`,
       summary: r.short_description || base.summary || "",
       mg_options: parseMgOptions(r.mg_options, r.default_mg, price),
       overview: base.overview || r.short_description || "Research product supplied for laboratory use only.",

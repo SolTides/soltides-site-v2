@@ -8,17 +8,17 @@
     "price": 200,
     "image": "slp-3.png",
     "lab": "slp-3-labs.png",
-    "summary": "Retatrutide research compound supplied in a 60mg lyophilized 3mL vial.",
+    "summary": "SLP-3 is Retatrutide supplied as a 60mg lyophilized research compound in a 3mL vial.",
     "mg_options": [
       {
         "label": "60mg",
         "price": 200
       }
     ],
-    "overview": "SLP-3 is Retatrutide supplied by SolTides for controlled laboratory research use only. This listing is for a 60mg lyophilized 3mL vial.",
-    "specs": "Catalog: SLP-3. Compound: Retatrutide. Amount: 60mg. Format: lyophilized 3mL vial. Intended use: laboratory research only.",
-    "storage": "Store sealed in a cool, dry, light-protected environment. Avoid heat, direct sunlight, and moisture.",
-    "quality": "Lot-specific testing documentation will be shown in the Lab Results section when available."
+    "overview": "SLP-3 is the SolTides catalog name for Retatrutide. Retatrutide is a synthetic research peptide used in laboratory settings for analytical, formulation, and non-clinical research applications. This listing is supplied as a 60mg lyophilized compound in a sealed 3mL vial.",
+    "specs": "Catalog name: SLP-3. Peptide name: Retatrutide. Listed amount: 60mg. Vial format: 3mL vial. Form: lyophilized research compound. Intended setting: controlled laboratory research only.",
+    "storage": "Store sealed in a cool, dry, light-protected environment. Keep the vial closed until laboratory handling. Avoid excessive heat, direct sunlight, repeated temperature changes, and unnecessary moisture exposure.",
+    "quality": "Testing documentation is used to verify product identity, purity, and overall lot quality before a compound is offered for research use. When a lot-specific lab report is available, it will be displayed in the Lab Results section on this page."
   },
   {
     "id": "slp-2",
@@ -29,17 +29,17 @@
     "price": 65,
     "image": "slp-2.png",
     "lab": "slp-2-labs.png",
-    "summary": "Tirzepatide research peptide supplied in a 15mg lyophilized 3mL vial.",
+    "summary": "SLP-2 is Tirzepatide supplied as a 15mg lyophilized research peptide in a 3mL vial.",
     "mg_options": [
       {
         "label": "15mg",
         "price": 65
       }
     ],
-    "overview": "SLP-2 is Tirzepatide supplied by SolTides for controlled laboratory research use only. This listing is for a 15mg lyophilized 3mL vial.",
-    "specs": "Catalog: SLP-2. Compound: Tirzepatide. Amount: 15mg. Format: lyophilized 3mL vial. Intended use: laboratory research only.",
-    "storage": "Store sealed in a cool, dry, light-protected environment. Avoid heat, direct sunlight, and moisture.",
-    "quality": "Lot-specific testing documentation will be shown in the Lab Results section when available."
+    "overview": "SLP-2 is the SolTides catalog name for Tirzepatide. Tirzepatide is a synthetic research peptide offered for laboratory research, analytical review, and non-clinical study settings. This product is supplied in a 15mg lyophilized format.",
+    "specs": "Catalog name: SLP-2. Peptide name: Tirzepatide. Listed amount: 15mg. Vial format: 3mL vial. Form: lyophilized research peptide. Intended setting: controlled laboratory research only.",
+    "storage": "Keep sealed and protected from heat, direct light, and moisture. Store in a stable laboratory environment and avoid unnecessary handling until the material is ready for research use.",
+    "quality": "Testing helps confirm identity, purity, and consistency for a listed research compound. Lot-specific documentation will be shown in the Lab Results section when available for this product."
   },
   {
     "id": "tesamorelin",
@@ -50,17 +50,17 @@
     "price": 50,
     "image": "tesamorelin.png",
     "lab": "tesamorelin-labs.png",
-    "summary": "Tesamorelin research peptide supplied in a 10mg lyophilized 3mL vial.",
+    "summary": "Tesamorelin is supplied as a 10mg lyophilized research peptide in a 3mL vial.",
     "mg_options": [
       {
         "label": "10mg",
         "price": 50
       }
     ],
-    "overview": "Tesamorelin is supplied by SolTides for controlled laboratory research use only. This listing is for a 10mg lyophilized 3mL vial.",
-    "specs": "Compound: Tesamorelin. Amount: 10mg. Format: lyophilized 3mL vial. Intended use: laboratory research only.",
-    "storage": "Store sealed in a cool, dry, light-protected environment. Avoid heat, direct sunlight, and moisture.",
-    "quality": "Lot-specific testing documentation will be shown in the Lab Results section when available."
+    "overview": "Tesamorelin is a synthetic research peptide supplied by SolTides for laboratory research and analytical use. This listing is for a 10mg lyophilized vial intended only for controlled research environments.",
+    "specs": "Peptide name: Tesamorelin. Listed amount: 10mg. Vial format: 3mL vial. Form: lyophilized research peptide. Intended setting: controlled laboratory research only.",
+    "storage": "Store sealed in a cool, dry, light-protected location. Avoid excessive heat, sunlight, and moisture exposure. Handle only under appropriate laboratory conditions.",
+    "quality": "Quality review may include identity and purity testing, lot documentation, and visual inspection of packaging and labeling. Available lab documentation will appear in the Lab Results section for this product."
   },
   {
     "id": "klow-blend",
@@ -71,17 +71,17 @@
     "price": 90,
     "image": "klow-blend.png",
     "lab": "klow-blend-labs.png",
-    "summary": "Multi-component research blend supplied in a lyophilized 3mL vial.",
+    "summary": "Klow Blend is a multi-component lyophilized research blend supplied in a 3mL vial.",
     "mg_options": [
       {
         "label": "50mg / 10mg / 10mg / 10mg",
         "price": 90
       }
     ],
-    "overview": "Klow Blend is a multi-component SolTides research blend supplied for controlled laboratory research use only.",
-    "specs": "Catalog: Klow Blend. Listed amount: 50mg / 10mg / 10mg / 10mg. Format: lyophilized 3mL vial. Intended use: laboratory research only.",
-    "storage": "Store sealed in a cool, dry, light-protected environment. Avoid heat, direct sunlight, and moisture.",
-    "quality": "Lot-specific testing documentation will be shown in the Lab Results section when available."
+    "overview": "Klow Blend is a SolTides multi-component research blend. The listed component amounts are shown on the product label and order summary. It is intended for laboratory research settings where accurate labeling and controlled handling are required.",
+    "specs": "Catalog name: Klow Blend. Listed amount: 50mg / 10mg / 10mg / 10mg. Vial format: 3mL vial. Form: lyophilized research blend. Intended setting: controlled laboratory research only.",
+    "storage": "Keep sealed and store in a dry, light-protected laboratory environment. Avoid heat, direct sunlight, and moisture exposure. Handle according to standard laboratory practices for lyophilized research materials.",
+    "quality": "Testing for blends focuses on confirming the labeled components, reviewing lot consistency, and supporting accurate research documentation. Lot-specific lab information will be displayed here when available."
   },
   {
     "id": "bpc-157-tb-500",
@@ -92,17 +92,17 @@
     "price": 80,
     "image": "bpc-157-tb-500.png",
     "lab": "bpc-157-tb-500-labs.png",
-    "summary": "BPC-157 + TB-500 research blend supplied in a 10mg / 10mg lyophilized 3mL vial.",
+    "summary": "BPC-157 + TB-500 Blend is supplied as a 10mg / 10mg lyophilized research blend in a 3mL vial.",
     "mg_options": [
       {
         "label": "10mg / 10mg",
         "price": 80
       }
     ],
-    "overview": "BPC-157 + TB-500 Blend is supplied by SolTides for controlled laboratory research use only. This listing is for a 10mg / 10mg lyophilized 3mL vial.",
-    "specs": "Compound: BPC-157 + TB-500 Blend. Amount: 10mg / 10mg. Format: lyophilized 3mL vial. Intended use: laboratory research only.",
-    "storage": "Store sealed in a cool, dry, light-protected environment. Avoid heat, direct sunlight, and moisture.",
-    "quality": "Lot-specific testing documentation will be shown in the Lab Results section when available."
+    "overview": "BPC-157 + TB-500 Blend is a two-component SolTides research blend offered for laboratory research use only. This listing contains BPC-157 and TB-500 in a 10mg / 10mg labeled format.",
+    "specs": "Peptide blend: BPC-157 + TB-500. Listed amount: 10mg / 10mg. Vial format: 3mL vial. Form: lyophilized research blend. Intended setting: controlled laboratory research only.",
+    "storage": "Store sealed, dry, and protected from light and heat. Avoid unnecessary moisture exposure and handle only in an appropriate laboratory setting.",
+    "quality": "Testing documentation helps support product identification, purity review, and lot traceability. When available, the lab report for this blend will appear in the Lab Results section."
   },
   {
     "id": "mt-1",
@@ -113,16 +113,16 @@
     "price": 40,
     "image": "mt-1.png",
     "lab": "mt-1-labs.png",
-    "summary": "Melanotan I research peptide supplied in a 10mg lyophilized 3mL vial.",
+    "summary": "MT-1 is Melanotan I supplied as a 10mg lyophilized research peptide in a 3mL vial.",
     "mg_options": [
       {
         "label": "10mg",
         "price": 40
       }
     ],
-    "overview": "MT-1 is Melanotan I supplied by SolTides for controlled laboratory research use only. This listing is for a 10mg lyophilized 3mL vial.",
-    "specs": "Catalog: MT-1. Compound: Melanotan I. Amount: 10mg. Format: lyophilized 3mL vial. Intended use: laboratory research only.",
-    "storage": "Store sealed in a cool, dry, light-protected environment. Avoid heat, direct sunlight, and moisture.",
-    "quality": "Lot-specific testing documentation will be shown in the Lab Results section when available."
+    "overview": "MT-1 is the SolTides catalog name for Melanotan I. It is supplied as a synthetic lyophilized research peptide for laboratory research, analytical review, and non-clinical study settings.",
+    "specs": "Catalog name: MT-1. Peptide name: Melanotan I. Listed amount: 10mg. Vial format: 3mL vial. Form: lyophilized research peptide. Intended setting: controlled laboratory research only.",
+    "storage": "Keep the vial sealed and protected from heat, direct light, and moisture. Store under stable laboratory conditions and avoid unnecessary handling before research use.",
+    "quality": "Quality review supports confidence in identity, purity, labeling, and lot traceability. Any available lab documentation will be shown in the Lab Results section for this product."
   }
 ]

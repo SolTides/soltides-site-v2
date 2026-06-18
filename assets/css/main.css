@@ -330,7 +330,7 @@ nav{
   }
 }
 
-/* Account and order receipt styles */
+/* Account + receipt phase */
 .checkout-account-box {
   border: 1px solid rgba(212, 175, 55, .28);
   background: rgba(212, 175, 55, .08);
