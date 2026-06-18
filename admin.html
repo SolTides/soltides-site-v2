@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SolTides Admin | Orders</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body data-path-prefix="">
+  <header>
+    <nav>
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><img src="assets/soltides-header-mark.png?v=8" alt=""></span><span>SOLTIDES</span></a>
+      <ul class="nav-links"><li><a href="index.html#products">Products</a></li><li><a href="index.html#contact">Contact</a></li></ul>
+      <a class="cart-btn" href="index.html">Store</a>
+    </nav>
+  </header>
+
+  <main class="admin-shell">
+    <div class="admin-top">
+      <div class="admin-title">
+        <h1>Order Admin</h1>
+        <p>View SolTides orders, customer notes, payment status, shipping status, and tracking.</p>
+      </div>
+      <div class="admin-actions" id="topActions" style="display:none;">
+        <button class="admin-small-btn admin-secondary" type="button" onclick="loadOrders()">Refresh</button>
+        <button class="admin-small-btn" type="button" onclick="signOut()">Sign out</button>
+      </div>
+    </div>
+
+    <section class="admin-card login-card" id="loginBox">
+      <h2 style="margin-top:0;color:#d4af37;">Admin Login</h2>
+      <p class="admin-muted">Use the admin user you created in Supabase.</p>
+      <form onsubmit="login(event)">
+        <label for="adminEmail">Email</label>
+        <input id="adminEmail" type="email" autocomplete="email" value="info@soltides.co" required>
+        <label for="adminPassword">Password</label>
+        <input id="adminPassword" type="password" autocomplete="current-password" required>
+        <button class="admin-btn" type="submit" style="width:100%;margin-top:12px;">Log in</button>
+      </form>
+      <div class="admin-message" id="loginMessage"></div>
+    </section>
+
+    <section class="admin-card" id="ordersBox" style="display:none;">
+      <div id="ordersMessage" class="admin-message">Loading orders...</div>
+      <div class="admin-grid" id="ordersGrid"></div>
+    </section>
+  </main>
+
+  <script type="module" src="assets/js/admin.js?v=1"></script>
+</body>
+</html>
