@@ -175,6 +175,11 @@ export async function loadProducts() {
 }
 
 export function currentProduct() {
-  const slug = document.body.dataset.productSlug;
+  const params = new URLSearchParams(window.location.search);
+  let slug = params.get("slug") || document.body.dataset.productSlug || "";
+  if (!slug) {
+    const pathMatch = window.location.pathname.match(/\/products\/([^\/]+)\.html$/);
+    if (pathMatch) slug = decodeURIComponent(pathMatch[1]);
+  }
   return state.products.find(p => p.slug === slug);
 }

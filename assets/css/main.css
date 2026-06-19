@@ -533,3 +533,33 @@ nav{
     height:92px !important;
   }
 }
+
+/* === Brand logo image update === */
+.brand.brand-logo{
+  display:flex;
+  align-items:center;
+  gap:0;
+  min-width:0;
+  flex:0 0 auto;
+  padding:4px 0;
+  text-decoration:none;
+}
+.brand.brand-logo img{
+  display:block;
+  height:74px;
+  width:auto;
+  max-width:min(44vw,360px);
+  object-fit:contain;
+  filter:drop-shadow(0 0 10px rgba(245,211,124,.15));
+}
+.nav-links{margin-left:auto;}
+@media(max-width:900px){
+  .brand.brand-logo img{height:62px;max-width:46vw;}
+}
+@media(max-width:640px){
+  .brand.brand-logo img{height:48px;max-width:48vw;}
+}
+
+/* === Hide old brand mark fallback === */
+.brand-logo .brand-mark,
+.brand-logo span:not(.cart-count){display:none!important;}

@@ -27,7 +27,7 @@ export function renderProductsGrid() {
         <p class="card-short">${esc(p.short_description || p.summary || '')}</p>
         <div class="price-row">
           <div class="price">$${money(p.price)}</div>
-          <a class="view-btn" href="products/${esc(p.slug)}.html">View Product</a>
+          <a class="view-btn" href="${esc(productHref(p.slug))}">View Product</a>
         </div>
       </div>
     </article>
@@ -40,6 +40,8 @@ export function renderProductPage() {
   document.title = `${p.code} | SolTides`;
   const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || ""; };
   setText("productCode", p.code);
+  setText("pageProductTitle", p.code);
+  setText("productBreadcrumbTitle", p.code);
   setText("productActual", p.actual);
   setText("productSpec", p.spec);
   setText("productSummary", p.summary || p.short_description);
@@ -62,7 +64,7 @@ export function renderProductPage() {
   const qty = document.getElementById("qtySelect");
   if (qty) {
     const maxStock = stockNumber(p);
-    const maxQty = isAvailable(p) ? (showStockCount(p) ? Math.max(1, Math.min(10, maxStock || 10)) : 10) : 0;
+    const maxQty = isAvailable(p) ? Math.max(1, Math.min(10, maxStock || 10)) : 0;
     qty.innerHTML = maxQty > 0 ? Array.from({ length: maxQty }, (_, i) => i + 1).map(n => `<option value="${n}">${n} ${n === 1 ? 'vial' : 'vials'}</option>`).join("") : `<option value="0">Unavailable</option>`;
     qty.disabled = maxQty === 0;
     qty.addEventListener("change", updateProductPrice);
@@ -120,7 +122,7 @@ export function toggleAccordion(btn) {
   btn.querySelector(".accordion-icon").textContent = item.classList.contains("open") ? "−" : "+";
 }
 
-function productHref(slug) { return `${state.pathPrefix}products/${slug}.html`; }
+function productHref(slug) { return `${state.pathPrefix}product.html?slug=${encodeURIComponent(slug)}`; }
 
 export function renderSiteMenu() {
   if (document.getElementById("siteMenu")) return;
