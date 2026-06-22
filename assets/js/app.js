@@ -1,8 +1,8 @@
 import { initState } from "./state.js";
 import { loadProducts } from "./products.js";
 import { addToCart, changeQty, closeCart, openCart, removeFromCart, updateCart } from "./cart.js";
-import { fetchBTC, initCheckoutAccount, submitOrder } from "./checkout.js?v=email-fallback-1";
-import { addSelectedProduct, handleContact, openSiteMenu, closeSiteMenu, renderHeroProductImage, renderProductPage, renderProductsGrid, renderSiteMenu, toggleAccordion, toggleSiteProductsMenu } from "./ui.js";
+import { fetchBTC, initCheckoutAccount, initCheckoutProtection, submitOrder } from "./checkout.js?v=secure-checkout-1";
+import { addSelectedProduct, openSiteMenu, closeSiteMenu, renderHeroProductImage, renderProductPage, renderProductsGrid, renderSiteMenu, toggleAccordion, toggleSiteProductsMenu } from "./ui.js";
 
 function exposeGlobals() {
   Object.assign(window, {
@@ -11,7 +11,6 @@ function exposeGlobals() {
     changeQty,
     closeCart,
     closeSiteMenu,
-    handleContact,
     openCart,
     openSiteMenu,
     removeFromCart,
@@ -32,6 +31,8 @@ async function boot() {
   updateCart();
   fetchBTC();
   initCheckoutAccount();
+  initCheckoutProtection();
+  document.getElementById("checkoutForm")?.addEventListener("submit", submitOrder);
 }
 
 document.addEventListener("DOMContentLoaded", boot);

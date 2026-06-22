@@ -5,6 +5,56 @@ import { stockNumber } from "./products.js";
 import { money } from "./utils.js";
 import { fillCheckoutFields, getAccessToken, getCurrentUser, getProfile } from "./auth.js";
 
+let turnstileRequired = false;
+let checkoutReady = false;
+let turnstileWidgetId = null;
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector(`script[src="${src}"]`);
+    if (existing) { existing.addEventListener("load", resolve, { once: true }); return; }
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = true;
+    script.defer = true;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
+export async function initCheckoutProtection() {
+  const form = document.getElementById("checkoutForm");
+  const orderBtn = document.getElementById("orderButton");
+  if (!form || !orderBtn) return;
+  orderBtn.disabled = true;
+  orderBtn.textContent = "Loading secure checkout...";
+  try {
+    const res = await fetch(CONFIG.checkoutConfigEndpoint, { cache: "no-store" });
+    const data = await res.json();
+    const siteKey = String(data.turnstile_site_key || "").trim();
+    if (!siteKey) throw new Error("Checkout protection is not configured.");
+    turnstileRequired = true;
+    const box = document.createElement("div");
+    box.id = "checkoutTurnstile";
+    box.className = "checkout-turnstile";
+    orderBtn.insertAdjacentElement("beforebegin", box);
+    await loadScript("https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit");
+    turnstileWidgetId = window.turnstile.render(box, { sitekey: siteKey, theme: "dark" });
+    checkoutReady = true;
+    orderBtn.disabled = false;
+    orderBtn.textContent = "Order";
+  } catch (error) {
+    console.error(error);
+    orderBtn.disabled = true;
+    orderBtn.textContent = "Checkout temporarily unavailable";
+    const note = document.createElement("p");
+    note.className = "small-note";
+    note.textContent = "Secure checkout is not configured. Please contact info@soltides.co.";
+    orderBtn.insertAdjacentElement("beforebegin", note);
+  }
+}
+
 export async function fetchBTC() {
   const rate = document.getElementById("btcRate");
   const sources = [
@@ -49,95 +99,6 @@ function orderReceivedUrl(orderNumber) {
   return `${prefix}order-received.html?order=${encodeURIComponent(orderNumber || "")}`;
 }
 
-function buildProductDetails(lines) {
-  return lines.map(line => `${line.name}\nQuantity: ${line.qty} ${line.qty === 1 ? "vial" : "vials"}\nUnit Price: $${money(line.unitPrice)}\nLine Total: $${money(line.lineTotal)}`).join("\n\n");
-}
-
-function buildProductDetailsInline(lines) {
-  return lines.map(line => `${line.name} × ${line.qty} = $${money(line.lineTotal)}`).join(" | ");
-}
-
-function buildProductHtmlRows(lines) {
-  return lines.map(line => `<tr><td style="padding:8px 0;border-bottom:1px solid #555;">${line.name}<br><span style="color:#999;">Qty: ${line.qty} • $${money(line.unitPrice)} each</span></td><td style="padding:8px 0;border-bottom:1px solid #555;text-align:right;">$${money(line.lineTotal)}</td></tr>`).join("");
-}
-
-async function sendClientOrderEmail({ data, customer, orderNotes, cartLines }) {
-  if (!window.emailjs || !CONFIG.emailjsPublicKey || !CONFIG.emailjsServiceId || !CONFIG.emailjsOrderTemplateId) {
-    console.warn("EmailJS browser SDK is not available.");
-    return false;
-  }
-
-  try {
-    if (!window.__soltidesEmailJsReady) {
-      window.emailjs.init({ publicKey: CONFIG.emailjsPublicKey });
-      window.__soltidesEmailJsReady = true;
-    }
-
-    const orderNumber = data.order_number || "";
-    const totalUsd = Number(data.total_usd || calcTotal() || 0);
-    const totalBtc = String(data.total_btc || "");
-    const orderDate = new Date().toLocaleString("en-US", { timeZone: "America/Chicago" });
-    const productDetails = buildProductDetails(cartLines);
-    const productDetailsInline = buildProductDetailsInline(cartLines);
-    const productHtmlRows = buildProductHtmlRows(cartLines);
-    const firstLine = cartLines[0] || { qty: "", lineTotal: totalUsd };
-
-    const params = {
-      to_email: customer.email,
-      email: customer.email,
-      customer_email: customer.email,
-      customer_name: customer.name,
-      customer_phone: customer.phone,
-      customer_address: customer.address,
-      customer_city: customer.city,
-      customer_state: customer.state,
-      customer_zip: customer.zip,
-      order_number: orderNumber,
-      order_id: orderNumber,
-      order_date: orderDate,
-      product_details: productDetails,
-      ordered_items: productDetails,
-      items_ordered: productDetails,
-      order_items: productDetails,
-      cart_items: productDetails,
-      items: productDetailsInline,
-      item_summary: productDetailsInline,
-      product_summary: productDetailsInline,
-      product_rows: productHtmlRows,
-      items_html: productHtmlRows,
-      order_items_html: productHtmlRows,
-      cart_items_html: productHtmlRows,
-      product_name: productDetailsInline,
-      item_name: productDetailsInline,
-      item_description: productDetailsInline,
-      quantity: firstLine.qty,
-      item_quantity: firstLine.qty,
-      item_price: money(firstLine.lineTotal || totalUsd),
-      price: money(firstLine.lineTotal || totalUsd),
-      item_total: money(firstLine.lineTotal || totalUsd),
-      line_total: money(firstLine.lineTotal || totalUsd),
-      total_usd: money(totalUsd),
-      total_btc: totalBtc,
-      bitcoin_address: data.bitcoin_address || CONFIG.btcAddress,
-      owner_email: CONFIG.ownerEmail,
-      order_notes: orderNotes,
-      customer_notes: orderNotes,
-      customer_note: orderNotes,
-      notes: orderNotes,
-      orderNote: orderNotes,
-      special_instructions: orderNotes,
-      customer_message: orderNotes
-    };
-
-    await window.emailjs.send(CONFIG.emailjsServiceId, CONFIG.emailjsOrderTemplateId, params);
-    return true;
-  } catch (error) {
-    console.warn("EmailJS browser fallback failed", error);
-    return false;
-  }
-}
-
-
 export async function initCheckoutAccount() {
   const form = document.getElementById("checkoutForm");
   if (!form || document.getElementById("checkoutAccountBox")) return;
@@ -165,9 +126,13 @@ export async function initCheckoutAccount() {
   }
 }
 
-export async function submitOrder() {
+export async function submitOrder(event) {
+  event?.preventDefault();
+  if (!checkoutReady) { alert("Secure checkout is not ready yet."); return; }
   if (state.cart.length === 0) { alert("Your cart is empty."); return; }
   if (!state.btcUsd) { alert("BTC rate is still loading. Please wait a moment and try again."); return; }
+  const turnstileToken = document.querySelector('[name="cf-turnstile-response"]')?.value || "";
+  if (turnstileRequired && !turnstileToken) { alert("Please complete the security check."); return; }
 
   const customer = {
     name: fieldValue("customerName"),
@@ -203,31 +168,23 @@ export async function submitOrder() {
     const authToken = await getAccessToken().catch(() => null);
     const saveShipping = Boolean(document.getElementById("saveShippingInfo")?.checked);
     const cartLines = getCartLines();
-    const clientPreview = {
-      total_usd: Number(calcTotal().toFixed(2)),
-      btc_usd_rate: Number(state.btcUsd)
-    };
     const payload = {
       customer,
       order_notes: orderNotes,
       cart: cartLines.map(line => ({ id: line.id, mgLabel: line.mgLabel, qty: line.qty })),
-      client_preview: clientPreview,
-      auth_token: authToken,
+      turnstile_token: turnstileToken,
       save_shipping: saveShipping
     };
 
     const res = await fetch(CONFIG.orderEndpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) },
       body: JSON.stringify(payload)
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || "Order could not be submitted.");
 
-    let emailSent = Boolean(data.email_sent);
-    if (!emailSent) {
-      emailSent = await sendClientOrderEmail({ data, customer, orderNotes, cartLines });
-    }
+    const emailSent = Boolean(data.email_sent);
 
     const lastOrder = {
       order_number: data.order_number,
@@ -253,8 +210,12 @@ export async function submitOrder() {
     window.location.href = orderReceivedUrl(data.order_number);
   } catch (err) {
     console.error(err);
+    if (turnstileWidgetId !== null) window.turnstile?.reset?.(turnstileWidgetId);
     alert(err.message || "Order did not send. Please email info@soltides.co or try again.");
   } finally {
-    if (orderBtn) { orderBtn.disabled = false; orderBtn.textContent = "Order"; }
+    if (orderBtn) {
+      orderBtn.disabled = !checkoutReady;
+      orderBtn.textContent = checkoutReady ? "Order" : "Checkout temporarily unavailable";
+    }
   }
 }

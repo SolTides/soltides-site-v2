@@ -1,12 +1,15 @@
 const SUPABASE_URL = process.env.SUPABASE_URL || "https://lcofklilvaatcorvfucz.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || "sb_publishable_ccOyDWazc9VM8cLRosW9mg_g-uDqu26";
-const SUPABASE_WRITE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || SUPABASE_PUBLISHABLE_KEY;
+const SUPABASE_WRITE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
 function restUrl(pathAndQuery) {
   return `${SUPABASE_URL}/rest/v1/${pathAndQuery}`;
 }
 
 async function supabaseFetch(pathAndQuery, { method = "GET", body = undefined, token = null, write = false, prefer = null } = {}) {
+  if (write && !SUPABASE_WRITE_KEY) {
+    throw new Error("Server configuration error: SUPABASE_SERVICE_ROLE_KEY is required for database writes.");
+  }
   const key = write ? SUPABASE_WRITE_KEY : SUPABASE_PUBLISHABLE_KEY;
   const headers = {
     apikey: key,
