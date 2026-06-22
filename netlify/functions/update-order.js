@@ -21,8 +21,10 @@ exports.handler = async function handler(event) {
     update.shipping_status = body.shipping_status;
   }
   if (Object.prototype.hasOwnProperty.call(body, "tracking_number")) {
+    if (String(body.tracking_number || "").length > 120) return json(400, { error: "Tracking number is too long." });
     update.tracking_number = body.tracking_number || null;
   }
+  if (!Object.keys(update).length) return json(400, { error: "No valid order updates were supplied." });
 
   try {
     await supabaseFetch(`orders?id=eq.${encodeURIComponent(body.id)}`, {

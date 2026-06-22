@@ -1,15 +1,30 @@
+const crypto = require("crypto");
 const { json, readJson } = require("./lib/http");
-const { SUPABASE_URL, SUPABASE_WRITE_KEY, supabaseFetch } = require("./lib/supabase-rest");
+const { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, supabaseFetch } = require("./lib/supabase-rest");
 const { loadCatalog, isAvailable, stockNumber, money } = require("./lib/catalog");
 const { fetchBtcUsd } = require("./lib/btc");
 
 const OWNER_EMAIL = process.env.OWNER_EMAIL || "info@soltides.co";
 const BTC_ADDRESS = process.env.BITCOIN_ADDRESS || "3LTbxKU9GnB34SaREGuxXN2Abh7jGkD6ZY";
-const EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY || "Pw8XPLxAilF6_DuRg";
-const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID || "service_sh9fwlv";
-const EMAILJS_ORDER_TEMPLATE_ID = process.env.EMAILJS_ORDER_TEMPLATE_ID || "template_lq0eiz6";
+const EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY || "";
+const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID || "";
+const EMAILJS_ORDER_TEMPLATE_ID = process.env.EMAILJS_ORDER_TEMPLATE_ID || "";
 
 function required(value) { return String(value || "").trim(); }
+
+async function verifyTurnstile(token, remoteIp) {
+  const secret = required(process.env.TURNSTILE_SECRET_KEY);
+  if (!secret) throw new Error("TURNSTILE_SECRET_KEY is not configured.");
+  const form = new URLSearchParams({ secret, response: required(token) });
+  if (remoteIp) form.set("remoteip", remoteIp);
+  const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: form.toString()
+  });
+  const result = await res.json().catch(() => ({}));
+  return Boolean(res.ok && result.success);
+}
 
 
 async function userFromToken(token) {
@@ -17,7 +32,7 @@ async function userFromToken(token) {
   if (!clean) return null;
   const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
     headers: {
-      apikey: SUPABASE_WRITE_KEY,
+      apikey: SUPABASE_PUBLISHABLE_KEY,
       Authorization: `Bearer ${clean}`
     }
   });
@@ -79,10 +94,13 @@ async function sendEmail(params) {
 
 exports.handler = async function handler(event) {
   if (event.httpMethod !== "POST") return json(405, { error: "Method not allowed" });
+  if (Buffer.byteLength(event.body || "", "utf8") > 25000) return json(413, { error: "Request is too large." });
   const body = readJson(event);
   if (!body) return json(400, { error: "Invalid JSON body" });
 
   try {
+    const remoteIp = (event.headers["x-nf-client-connection-ip"] || event.headers["x-forwarded-for"] || "").split(",")[0].trim();
+    if (!await verifyTurnstile(body.turnstile_token, remoteIp)) return json(400, { error: "Security check failed. Please try again." });
     const customer = body.customer || {};
     const name = required(customer.name);
     const email = required(customer.email).toLowerCase();
@@ -97,11 +115,17 @@ exports.handler = async function handler(event) {
     if (!name || !email || !street || !city || !state || !zip) {
       return json(400, { error: "Please fill out name, email, and full shipping address." });
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json(400, { error: "Please enter a valid email address." });
+    if (name.length > 120 || email.length > 254 || phone.length > 40 || street.length > 200 || city.length > 100 || state.length > 32 || zip.length > 20 || orderNotes.length > 1000) {
+      return json(400, { error: "One or more checkout fields is too long." });
+    }
     if (!Array.isArray(body.cart) || !body.cart.length) {
       return json(400, { error: "Your cart is empty." });
     }
+    if (body.cart.length > 50) return json(400, { error: "Your cart contains too many line items." });
 
-    const authUser = await userFromToken(body.auth_token);
+    const authToken = (event.headers.authorization || event.headers.Authorization || "").replace(/^Bearer\s+/i, "").trim();
+    const authUser = await userFromToken(authToken);
 
     const catalog = await loadCatalog();
     const byId = new Map(catalog.map(p => [p.id || p.slug, p]));
@@ -146,7 +170,7 @@ exports.handler = async function handler(event) {
     const totalUsd = Number(lines.reduce((sum, line) => sum + line.lineTotal, 0).toFixed(2));
     const btcUsd = await fetchBtcUsd();
     const totalBtc = Number((totalUsd / btcUsd).toFixed(8));
-    const orderNumber = `ST-${Date.now().toString().slice(-8)}`;
+    const orderNumber = `ST-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
     const orderDate = new Date().toLocaleString("en-US", { timeZone: "America/Chicago" });
     const productDetails = buildProductDetails(lines);
     const productDetailsInline = buildProductDetailsInline(lines);
@@ -255,6 +279,6 @@ exports.handler = async function handler(event) {
     });
   } catch (error) {
     console.error(error);
-    return json(500, { error: error.message || "Order could not be submitted." });
+    return json(500, { error: "Order could not be submitted. Please try again." });
   }
 };

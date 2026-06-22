@@ -176,8 +176,3 @@ export function toggleSiteProductsMenu() {
   sec.classList.toggle("open");
   if (icon) icon.textContent = sec.classList.contains("open") ? "−" : "+";
 }
-
-export function handleContact(e) {
-  e.preventDefault();
-  alert("Thanks. Please email info@soltides.co for now.");
-}

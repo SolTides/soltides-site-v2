@@ -13,6 +13,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:Inter,system-ui,sans-serif;background:var(--black);color:var(--ink);line-height:1.6;overflow-x:hidden}
+.form-honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
 a{color:inherit}
 header{position:sticky;top:0;z-index:1000;background:rgba(5,5,4,.88);backdrop-filter:blur(16px);border-bottom:1px solid rgba(196,154,74,.18)}
 nav{max-width:1200px;margin:0 auto;padding:0 22px;min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:18px}
