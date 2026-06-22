@@ -112,7 +112,7 @@ async function loadSheetProducts(fallbackProducts) {
   if (rows.length < 2) throw new Error("Sheet has no product rows.");
   const headers = rows[0].map(h => String(h).trim());
   const bySlug = new Map(fallbackProducts.map(p => [p.slug, p]));
-  return rows.slice(1).map(cells => {
+  const products = rows.slice(1).map(cells => {
     const r = {};
     headers.forEach((h, i) => {
       const value = String(cells[i] ?? "").trim();
@@ -158,6 +158,13 @@ async function loadSheetProducts(fallbackProducts) {
       quality: base.quality || "Testing documentation supports product identity, purity, lot quality, and traceability. Lot-specific documentation will be displayed when available."
     };
   }).filter(p => p.slug);
+
+  const uniqueBySlug = new Map();
+  for (const product of products) {
+    const existing = uniqueBySlug.get(product.slug);
+    if (!existing || (!isVisible(existing) && isVisible(product))) uniqueBySlug.set(product.slug, product);
+  }
+  return [...uniqueBySlug.values()];
 }
 
 export async function loadProducts() {

@@ -60,7 +60,7 @@ async function sheetProducts(fallbackProducts) {
   if (rows.length < 2) throw new Error("Sheet has no product rows.");
   const headers = rows[0].map(h => String(h).trim());
   const bySlug = new Map(fallbackProducts.map(p => [p.slug, p]));
-  return rows.slice(1).map(cells => {
+  const products = rows.slice(1).map(cells => {
     const r = {};
     headers.forEach((h, i) => r[h] = String(cells[i] ?? "").trim());
     const base = bySlug.get(r.slug) || {};
@@ -80,6 +80,13 @@ async function sheetProducts(fallbackProducts) {
       mg_options: parseMgOptions(r.mg_options, r.default_mg, price)
     };
   }).filter(p => p.slug);
+
+  const uniqueBySlug = new Map();
+  for (const product of products) {
+    const existing = uniqueBySlug.get(product.slug);
+    if (!existing || (!isVisible(existing) && isVisible(product))) uniqueBySlug.set(product.slug, product);
+  }
+  return [...uniqueBySlug.values()];
 }
 
 async function loadCatalog() {
