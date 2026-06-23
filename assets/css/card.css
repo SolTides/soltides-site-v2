@@ -1,0 +1,107 @@
+:root {
+  color-scheme: dark;
+  --gold: #d6a932;
+  --gold-light: #f5dda0;
+  --ink: #080706;
+  --cream: #f7f1e5;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--cream);
+  background:
+    radial-gradient(circle at 50% 5%, rgba(214,169,50,.16), transparent 35rem),
+    linear-gradient(145deg, #050505, #11100d 58%, #060606);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .35;
+  background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.card-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: max(24px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+}
+
+.digital-card {
+  position: relative;
+  isolation: isolate;
+  width: min(100%, 520px);
+  overflow: hidden;
+  padding: clamp(24px, 7vw, 42px);
+  border: 1px solid rgba(214,169,50,.34);
+  border-radius: 30px;
+  background: linear-gradient(155deg, rgba(28,26,21,.97), rgba(8,8,7,.98));
+  box-shadow: 0 28px 90px rgba(0,0,0,.56), inset 0 1px rgba(255,255,255,.07);
+}
+
+.card-glow {
+  position: absolute;
+  z-index: -1;
+  width: 280px;
+  height: 280px;
+  top: -150px;
+  right: -110px;
+  border-radius: 50%;
+  background: rgba(214,169,50,.22);
+  filter: blur(55px);
+}
+
+.logo { display: block; width: min(100%, 320px); margin: 0 auto 26px; }
+.logo img { display: block; width: 100%; height: auto; }
+.eyebrow { color: var(--gold); font-size: .7rem; font-weight: 800; letter-spacing: .18em; text-align: center; }
+h1 { margin: 10px 0 9px; font-family: Lora, Georgia, serif; font-size: clamp(2rem, 8vw, 3rem); line-height: 1.05; text-align: center; }
+.intro { max-width: 400px; margin: 0 auto 26px; color: rgba(247,241,229,.68); line-height: 1.6; text-align: center; }
+
+.primary-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 68px;
+  padding: 12px;
+  color: var(--cream);
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 17px;
+  background: rgba(255,255,255,.055);
+  text-decoration: none;
+  font-weight: 750;
+}
+.action-primary { color: #17130a; border-color: transparent; background: linear-gradient(135deg, var(--gold), var(--gold-light)); }
+.action-icon { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; border-radius: 50%; background: rgba(255,255,255,.13); font-size: 1.25rem; }
+.action small { display: block; margin-bottom: 3px; opacity: .66; font-size: .63rem; font-weight: 600; }
+
+.contact-list { margin: 20px 0; overflow: hidden; border: 1px solid rgba(255,255,255,.09); border-radius: 18px; background: rgba(0,0,0,.23); }
+.contact-list a { display: flex; justify-content: space-between; gap: 16px; padding: 14px 16px; color: var(--cream); border-bottom: 1px solid rgba(255,255,255,.07); text-decoration: none; }
+.contact-list a:last-child { border-bottom: 0; }
+.contact-list span { color: rgba(247,241,229,.55); font-size: .78rem; }
+.contact-list strong { font-size: .88rem; text-align: right; overflow-wrap: anywhere; }
+
+.share-row { display: grid; grid-template-columns: 106px 1fr; align-items: center; gap: 18px; padding: 15px; border: 1px solid rgba(214,169,50,.2); border-radius: 19px; background: rgba(214,169,50,.065); }
+.qr-wrap { padding: 8px; border-radius: 13px; background: #fff; }
+.qr-wrap img { display: block; width: 100%; aspect-ratio: 1; }
+.share-copy strong { color: var(--gold-light); }
+.share-copy p { margin: 5px 0 10px; color: rgba(247,241,229,.58); font-size: .78rem; line-height: 1.45; }
+.share-copy button { padding: 9px 14px; color: #17130a; border: 0; border-radius: 999px; background: var(--gold-light); font: inherit; font-size: .78rem; font-weight: 800; cursor: pointer; }
+#shareStatus { margin-left: 8px; color: var(--gold-light); font-size: .72rem; }
+.card-footer { margin: 22px 0 0; color: rgba(247,241,229,.38); font-size: .68rem; letter-spacing: .04em; text-align: center; }
+
+@media (max-width: 430px) {
+  .digital-card { border-radius: 24px; }
+  .primary-actions { grid-template-columns: 1fr; }
+  .contact-list a { align-items: flex-start; flex-direction: column; gap: 5px; }
+  .contact-list strong { text-align: left; }
+  .share-row { grid-template-columns: 88px 1fr; gap: 13px; }
+}
