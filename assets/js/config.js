@@ -7,5 +7,8 @@ export const CONFIG = {
   orderEndpoint: "/.netlify/functions/create-order",
   checkoutConfigEndpoint: "/.netlify/functions/checkout-config",
   adminOrdersEndpoint: "/.netlify/functions/get-admin-orders",
-  updateOrderEndpoint: "/.netlify/functions/update-order"
+  updateOrderEndpoint: "/.netlify/functions/update-order",
+  inventoryEndpoint: "/.netlify/functions/get-inventory",
+  adminInventoryEndpoint: "/.netlify/functions/get-admin-inventory",
+  updateInventoryEndpoint: "/.netlify/functions/update-inventory"
 };

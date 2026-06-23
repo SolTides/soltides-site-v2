@@ -1,7 +1,7 @@
 const crypto = require("crypto");
 const { json, readJson } = require("./lib/http");
 const { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, supabaseFetch } = require("./lib/supabase-rest");
-const { loadCatalog, isAvailable, stockNumber, money } = require("./lib/catalog");
+const { loadCatalog, money } = require("./lib/catalog");
 const { fetchBtcUsd } = require("./lib/btc");
 
 const OWNER_EMAIL = process.env.OWNER_EMAIL || "info@soltides.co";
@@ -132,7 +132,6 @@ exports.handler = async function handler(event) {
 
     const catalog = await loadCatalog();
     const byId = new Map(catalog.map(p => [p.id || p.slug, p]));
-    const totalQtyByProduct = new Map();
     const lines = [];
 
     for (const item of body.cart) {
@@ -143,31 +142,22 @@ exports.handler = async function handler(event) {
         return json(400, { error: "Invalid cart quantity." });
       }
       const product = byId.get(id);
-      if (!product || !isAvailable(product)) {
+      if (!product || String(product.visible || "yes").toLowerCase() === "no") {
         return json(400, { error: "One or more products is unavailable." });
       }
       const option = (product.mg_options || []).find(o => String(o.label) === mgLabel) || (product.mg_options || [])[0];
       if (!option) return json(400, { error: "Invalid product option." });
-      const prevQty = totalQtyByProduct.get(id) || 0;
-      totalQtyByProduct.set(id, prevQty + qty);
       const unitPrice = Number(option.price || product.price || 0);
       const lineTotal = unitPrice * qty;
       const actual = product.actual ? ` — ${product.actual}` : "";
       lines.push({
         id,
+        optionLabel: option.label || "",
         name: `${product.code || id}${actual}${option.label ? " " + option.label : ""}`.trim(),
         qty,
         unitPrice,
         lineTotal
       });
-    }
-
-    for (const [id, qty] of totalQtyByProduct.entries()) {
-      const product = byId.get(id);
-      const max = stockNumber(product);
-      if (max !== null && qty > max) {
-        return json(400, { error: "One or more items is not currently available at that quantity." });
-      }
     }
 
     const totalUsd = Number(lines.reduce((sum, line) => sum + line.lineTotal, 0).toFixed(2));
@@ -179,43 +169,34 @@ exports.handler = async function handler(event) {
     const productDetailsInline = buildProductDetailsInline(lines);
     const productHtmlRows = buildProductHtmlRows(lines);
 
-    const savedOrders = await supabaseFetch("orders", {
+    const savedOrder = await supabaseFetch("rpc/create_order_with_inventory", {
       method: "POST",
       write: true,
-      prefer: "return=representation",
       body: {
-        order_number: orderNumber,
-        user_id: authUser?.id || null,
-        customer_email: email,
-        customer_name: name,
-        customer_phone: phone,
-        customer_address: address,
-        order_notes: orderNotes,
-        product_details: productDetails,
-        total_usd: totalUsd,
-        total_btc: totalBtc,
-        bitcoin_address: BTC_ADDRESS,
-        payment_status: "pending",
-        shipping_status: "not_shipped"
-      }
-    });
-    const savedOrder = savedOrders?.[0];
-    if (!savedOrder?.id) throw new Error("Order saved but no order ID was returned.");
-
-    if (lines.length) {
-      await supabaseFetch("order_items", {
-        method: "POST",
-        write: true,
-        prefer: "return=minimal",
-        body: lines.map(line => ({
-          order_id: savedOrder.id,
+        p_order: {
+          order_number: orderNumber,
+          user_id: authUser?.id || null,
+          customer_email: email,
+          customer_name: name,
+          customer_phone: phone,
+          customer_address: address,
+          order_notes: orderNotes,
+          product_details: productDetails,
+          total_usd: totalUsd,
+          total_btc: totalBtc,
+          bitcoin_address: BTC_ADDRESS
+        },
+        p_items: lines.map(line => ({
+          product_id: line.id,
+          option_label: line.optionLabel,
           product_name: line.name,
           quantity: line.qty,
           unit_price: Number(line.unitPrice.toFixed(2)),
           line_total: Number(line.lineTotal.toFixed(2))
         }))
-      });
-    }
+      }
+    });
+    if (!savedOrder?.id) throw new Error("Order saved but no order ID was returned.");
 
     if (authUser?.id && body.save_shipping) {
       await saveProfileForUser(authUser, { name, email, phone, street, city, state, zip });
@@ -235,6 +216,7 @@ exports.handler = async function handler(event) {
       order_number: orderNumber,
       order_id: orderNumber,
       order_date: orderDate,
+      payment_deadline: new Date(savedOrder.inventory_expires_at).toLocaleString("en-US", { timeZone: "America/Chicago" }),
       product_details: productDetails,
       ordered_items: productDetails,
       items_ordered: productDetails,
@@ -278,10 +260,14 @@ exports.handler = async function handler(event) {
       total_usd: totalUsd,
       total_btc: totalBtc.toFixed(8),
       bitcoin_address: BTC_ADDRESS,
+      inventory_expires_at: savedOrder.inventory_expires_at,
       email_sent: emailSent
     });
   } catch (error) {
     console.error(error);
+    if (String(error?.message || "").includes("inventory_unavailable:")) {
+      return json(409, { error: "One or more items is no longer available at that quantity. Your card has been refreshed." });
+    }
     return json(500, { error: "Order could not be submitted. Please try again." });
   }
 };

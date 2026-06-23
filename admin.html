@@ -26,7 +26,7 @@
         <p>View SolTides orders, customer notes, payment status, shipping status, and tracking.</p>
       </div>
       <div class="admin-actions" id="topActions" style="display:none;">
-        <button class="admin-small-btn admin-secondary" type="button" onclick="loadOrders()">Refresh</button>
+        <button class="admin-small-btn admin-secondary" type="button" onclick="refreshAdmin()">Refresh</button>
         <button class="admin-small-btn" type="button" onclick="signOut()">Sign out</button>
       </div>
     </div>
@@ -44,12 +44,21 @@
       <div class="admin-message" id="loginMessage"></div>
     </section>
 
+    <section class="admin-card" id="inventoryBox" style="display:none;margin-bottom:18px;">
+      <div class="admin-section-head">
+        <div><h2>Inventory</h2><p class="admin-muted">Stock here controls the live store. “Auto” uses the quantity and low-stock threshold.</p></div>
+      </div>
+      <div id="inventoryMessage" class="admin-message">Loading inventory...</div>
+      <div class="inventory-grid" id="inventoryGrid"></div>
+    </section>
+
     <section class="admin-card" id="ordersBox" style="display:none;">
+      <h2>Orders</h2>
       <div id="ordersMessage" class="admin-message">Loading orders...</div>
       <div class="admin-grid" id="ordersGrid"></div>
     </section>
   </main>
 
-  <script type="module" src="assets/js/admin.js?v=1"></script>
+  <script type="module" src="assets/js/admin.js?v=2"></script>
 </body>
 </html>

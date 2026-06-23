@@ -195,6 +195,7 @@ export async function submitOrder(event) {
       total_usd: data.total_usd,
       total_btc: data.total_btc,
       bitcoin_address: data.bitcoin_address,
+      inventory_expires_at: data.inventory_expires_at,
       email_sent: emailSent
     };
     localStorage.setItem("soltides_last_order", JSON.stringify(lastOrder));

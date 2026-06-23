@@ -24,10 +24,19 @@ body { background: #090909; color: #f3f0e8; min-height: 100vh; }
     .admin-message { margin-top: 12px; color: rgba(243,240,232,.72); font-size: .92rem; line-height: 1.5; }
     .admin-pill { display: inline-block; padding: 5px 9px; border-radius: 999px; background: rgba(212,175,55,.13); color: #f5dfa0; border: 1px solid rgba(212,175,55,.25); font-size: .82rem; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; }
     .items-list { white-space: pre-wrap; line-height: 1.5; }
+    .admin-card h2 { margin: 0 0 10px; color: #d4af37; }
+    .inventory-grid { display: grid; gap: 10px; margin-top: 14px; }
+    .inventory-row { display: grid; grid-template-columns: 1.1fr .7fr 1fr .7fr .8fr .8fr auto; gap: 10px; align-items: end; padding: 12px; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; }
+    .inventory-row > strong { align-self: center; color: #f5dfa0; overflow-wrap: anywhere; }
+    .inventory-row label { display: grid; gap: 5px; color: rgba(243,240,232,.68); font-size: .78rem; }
+    .inventory-row input, .inventory-row select { width: 100%; min-width: 0; }
+    .inventory-row .inventory-check { display: flex; align-items: center; gap: 7px; padding-bottom: 10px; }
+    .inventory-row .inventory-check input { width: auto; }
     @media (max-width: 850px) {
       .admin-shell { margin-top: 78px; }
       .admin-top { align-items: stretch; flex-direction: column; }
       .admin-columns, .status-controls { grid-template-columns: 1fr; }
+      .inventory-row { grid-template-columns: 1fr 1fr; }
       .admin-actions { width: 100%; }
       .admin-actions button { flex: 1; }
     }
