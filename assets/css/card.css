@@ -38,25 +38,17 @@ body::before {
 .digital-card {
   position: relative;
   isolation: isolate;
+  contain: paint;
   width: min(100%, 520px);
   overflow: hidden;
   padding: clamp(24px, 7vw, 42px);
   border: 1px solid rgba(214,169,50,.34);
   border-radius: 30px;
-  background: linear-gradient(155deg, rgba(28,26,21,.97), rgba(8,8,7,.98));
+  background:
+    radial-gradient(circle at 100% 0%, rgba(214,169,50,.2), transparent 42%),
+    linear-gradient(155deg, rgba(28,26,21,.97), rgba(8,8,7,.98));
+  background-clip: padding-box;
   box-shadow: 0 28px 90px rgba(0,0,0,.56), inset 0 1px rgba(255,255,255,.07);
-}
-
-.card-glow {
-  position: absolute;
-  z-index: -1;
-  width: 280px;
-  height: 280px;
-  top: -150px;
-  right: -110px;
-  border-radius: 50%;
-  background: rgba(214,169,50,.22);
-  filter: blur(55px);
 }
 
 .logo { display: block; width: min(100%, 320px); margin: 0 auto 26px; }
