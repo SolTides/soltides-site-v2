@@ -27,11 +27,15 @@ exports.handler = async function handler(event) {
   if (!Object.keys(update).length) return json(400, { error: "No valid order updates were supplied." });
 
   try {
-    await supabaseFetch(`orders?id=eq.${encodeURIComponent(body.id)}`, {
-      method: "PATCH",
+    await supabaseFetch("rpc/admin_update_order", {
+      method: "POST",
       token,
-      prefer: "return=minimal",
-      body: update
+      body: {
+        p_order_id: body.id,
+        p_payment_status: update.payment_status,
+        p_shipping_status: update.shipping_status,
+        p_tracking_number: update.tracking_number || null
+      }
     });
     return json(200, { ok: true });
   } catch (error) {

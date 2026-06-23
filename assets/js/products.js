@@ -167,6 +167,24 @@ async function loadSheetProducts(fallbackProducts) {
   return [...uniqueBySlug.values()];
 }
 
+async function overlayInventory(products) {
+  const res = await fetch(CONFIG.inventoryEndpoint, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Inventory fetch failed ${res.status}`);
+  const payload = await res.json();
+  const byId = new Map((payload.inventory || []).map(row => [row.product_id, row]));
+  return products.map(product => {
+    const inventory = byId.get(product.id || product.slug);
+    if (!inventory) return { ...product, stock: 0, stock_status: "out_of_stock" };
+    return {
+      ...product,
+      stock: inventory.stock,
+      stock_status: inventory.stock_status,
+      show_stock_count: inventory.show_stock_count ? "yes" : "no",
+      visible: inventory.stock_status === "hidden" ? "no" : product.visible
+    };
+  });
+}
+
 export async function loadProducts() {
   let localProducts = [];
   try { localProducts = await loadLocalProducts(); } catch (e) { console.warn("Local product fallback failed", e); }
@@ -177,7 +195,13 @@ export async function loadProducts() {
     console.warn("Google Sheet product load failed. Using local fallback.", e);
     state.products = localProducts;
   }
-  state.cart = state.cart.filter(item => state.products.some(p => p.id === item.id));
+  try {
+    state.products = await overlayInventory(state.products);
+  } catch (error) {
+    console.error("Live inventory unavailable; checkout has been disabled to prevent overselling.", error);
+    state.products = state.products.map(product => ({ ...product, stock: 0, stock_status: "out_of_stock" }));
+  }
+  state.cart = state.cart.filter(item => state.products.some(p => p.id === item.id && isAvailable(p)));
   saveCart();
 }
 

@@ -28,15 +28,74 @@ window.signOut = async function signOut() {
   await supabase.auth.signOut();
   document.getElementById("loginBox").style.display = "block";
   document.getElementById("ordersBox").style.display = "none";
+  document.getElementById("inventoryBox").style.display = "none";
   document.getElementById("topActions").style.display = "none";
 };
 
 async function showAdmin() {
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("ordersBox").style.display = "block";
+  document.getElementById("inventoryBox").style.display = "block";
   document.getElementById("topActions").style.display = "flex";
-  await loadOrders();
+  await refreshAdmin();
 }
+
+window.refreshAdmin = async function refreshAdmin() {
+  await Promise.all([loadInventory(), loadOrders()]);
+};
+
+window.loadInventory = async function loadInventory() {
+  const grid = document.getElementById("inventoryGrid");
+  const msg = document.getElementById("inventoryMessage");
+  msg.textContent = "Loading inventory...";
+  try {
+    const res = await fetch(CONFIG.adminInventoryEndpoint, { headers: await authHeaders() });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(payload.error || "Could not load inventory.");
+    const rows = payload.inventory || [];
+    msg.textContent = `${rows.length} products. Changes take effect on the store immediately.`;
+    grid.innerHTML = rows.map(inventoryRow).join("");
+  } catch (error) {
+    msg.textContent = error.message;
+  }
+};
+
+function inventoryRow(row) {
+  return `<article class="inventory-row" data-product-id="${esc(row.product_id)}">
+    <strong>${esc(row.product_id)}</strong>
+    <label>On hand<input data-inventory="stock" type="number" min="0" step="1" value="${esc(row.stock)}"></label>
+    <label>Availability<select data-inventory="availability_status">
+      ${["auto", "out_of_stock", "coming_soon", "limited", "hidden"].map(v => `<option value="${v}" ${row.availability_status === v ? "selected" : ""}>${v.replaceAll("_", " ")}</option>`).join("")}
+    </select></label>
+    <label>Low at<input data-inventory="low_stock_threshold" type="number" min="0" step="1" value="${esc(row.low_stock_threshold)}"></label>
+    <label class="inventory-check"><input data-inventory="enabled" type="checkbox" ${row.enabled ? "checked" : ""}> Store enabled</label>
+    <label class="inventory-check"><input data-inventory="show_stock_count" type="checkbox" ${row.show_stock_count ? "checked" : ""}> Show count</label>
+    <button class="admin-small-btn" type="button" onclick="saveInventory('${esc(row.product_id)}')">Save stock</button>
+  </article>`;
+}
+
+window.saveInventory = async function saveInventory(productId) {
+  const row = document.querySelector(`[data-product-id="${CSS.escape(productId)}"]`);
+  if (!row) return;
+  const body = {
+    product_id: productId,
+    stock: Number(row.querySelector('[data-inventory="stock"]').value),
+    availability_status: row.querySelector('[data-inventory="availability_status"]').value,
+    low_stock_threshold: Number(row.querySelector('[data-inventory="low_stock_threshold"]').value),
+    enabled: row.querySelector('[data-inventory="enabled"]').checked,
+    show_stock_count: row.querySelector('[data-inventory="show_stock_count"]').checked
+  };
+  try {
+    const res = await fetch(CONFIG.updateInventoryEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(await authHeaders()) },
+      body: JSON.stringify(body)
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(payload.error || "Could not update inventory.");
+    await loadInventory();
+  } catch (error) { alert(error.message); }
+};
 
 window.loadOrders = async function loadOrders() {
   const grid = document.getElementById("ordersGrid");

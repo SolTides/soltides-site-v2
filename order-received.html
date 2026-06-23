@@ -54,6 +54,7 @@
       ${order?.total_usd ? `<div class="receipt-row"><span>Total</span><strong>$${money(order.total_usd)}</strong></div>` : ""}
       ${order?.total_btc ? `<div class="receipt-row"><span>Bitcoin Amount Due</span><strong>${esc(order.total_btc)} BTC</strong></div>` : ""}
       ${order?.bitcoin_address ? `<div class="receipt-address"><span>Bitcoin Address</span><code>${esc(order.bitcoin_address)}</code></div>` : ""}
+      ${order?.inventory_expires_at ? `<div class="receipt-row"><span>Payment deadline</span><strong>${esc(new Date(order.inventory_expires_at).toLocaleString())}</strong></div><div class="receipt-warning">Stock is reserved for two hours. If payment is not marked received by this deadline, the order is cancelled automatically.</div>` : ""}
       ${items ? `<div class="receipt-items"><span>Items</span><pre>${esc(items)}</pre></div>` : ""}
       ${order?.email_sent === false ? `<div class="receipt-warning">Order saved, but the email confirmation may not have sent. Please save this page and contact info@soltides.co with your order number.</div>` : ""}
     `;
