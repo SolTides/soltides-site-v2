@@ -7,6 +7,7 @@ const { fetchBtcUsd } = require("./lib/btc");
 const OWNER_EMAIL = process.env.OWNER_EMAIL || "info@soltides.co";
 const BTC_ADDRESS = process.env.BITCOIN_ADDRESS || "3LTbxKU9GnB34SaREGuxXN2Abh7jGkD6ZY";
 const EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY || "";
+const EMAILJS_PRIVATE_KEY = process.env.EMAILJS_PRIVATE_KEY || "";
 const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID || "";
 const EMAILJS_ORDER_TEMPLATE_ID = process.env.EMAILJS_ORDER_TEMPLATE_ID || "";
 
@@ -74,15 +75,17 @@ function buildProductHtmlRows(lines) {
 
 async function sendEmail(params) {
   if (!EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID || !EMAILJS_ORDER_TEMPLATE_ID) return false;
+  const requestBody = {
+    service_id: EMAILJS_SERVICE_ID,
+    template_id: EMAILJS_ORDER_TEMPLATE_ID,
+    user_id: EMAILJS_PUBLIC_KEY,
+    template_params: params
+  };
+  if (EMAILJS_PRIVATE_KEY) requestBody.accessToken = EMAILJS_PRIVATE_KEY;
   const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      service_id: EMAILJS_SERVICE_ID,
-      template_id: EMAILJS_ORDER_TEMPLATE_ID,
-      user_id: EMAILJS_PUBLIC_KEY,
-      template_params: params
-    })
+    body: JSON.stringify(requestBody)
   });
   if (!res.ok) {
     const text = await res.text();
