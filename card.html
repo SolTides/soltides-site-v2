@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SolTides | Digital Business Card</title>
+  <meta name="description" content="Connect with SolTides, browse the store, or save our contact information.">
+  <meta property="og:title" content="SolTides | Digital Business Card">
+  <meta property="og:description" content="Connect with SolTides and browse the store.">
+  <meta property="og:image" content="https://soltides.co/assets/soltides-logo-header-v2.png">
+  <meta property="og:url" content="https://soltides.co/card">
+  <meta name="theme-color" content="#080706">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/card.css?v=1">
+  <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"Organization","name":"SolTides","url":"https://soltides.co","email":"info@soltides.co","telephone":"+1-832-506-9602"}
+  </script>
+</head>
+<body>
+  <main class="card-page">
+    <section class="digital-card" aria-labelledby="cardTitle">
+      <div class="card-glow" aria-hidden="true"></div>
+      <a class="logo" href="https://soltides.co" aria-label="Visit SolTides">
+        <img src="assets/soltides-logo-header-v2.png" alt="SolTides">
+      </a>
+
+      <div class="eyebrow">DIGITAL BUSINESS CARD</div>
+      <h1 id="cardTitle">Connect with SolTides</h1>
+      <p class="intro">Explore our research product catalog, get support, or save our details for later.</p>
+
+      <div class="primary-actions">
+        <a class="action action-primary" href="https://soltides.co">
+          <span class="action-icon" aria-hidden="true">↗</span>
+          <span><small>Browse online</small>Visit the Store</span>
+        </a>
+        <a class="action" href="assets/soltides-contact.vcf" download>
+          <span class="action-icon" aria-hidden="true">+</span>
+          <span><small>Add to your phone</small>Save Contact</span>
+        </a>
+      </div>
+
+      <div class="contact-list">
+        <a href="tel:+18325069602"><span>Call or text</span><strong>(832) 506-9602</strong></a>
+        <a href="mailto:info@soltides.co"><span>Email</span><strong>info@soltides.co</strong></a>
+        <a href="https://soltides.co"><span>Website</span><strong>soltides.co</strong></a>
+      </div>
+
+      <div class="share-row">
+        <div class="qr-wrap">
+          <img src="assets/soltides-card-qr.svg" alt="QR code for the SolTides digital business card">
+        </div>
+        <div class="share-copy">
+          <strong>Share SolTides</strong>
+          <p>Scan the code or send this card to someone.</p>
+          <button id="shareButton" type="button">Share Card</button>
+          <span id="shareStatus" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <p class="card-footer">SolTides · Quality, clarity, and dependable service</p>
+    </section>
+  </main>
+
+  <script>
+    const shareButton = document.getElementById("shareButton");
+    const shareStatus = document.getElementById("shareStatus");
+    shareButton.addEventListener("click", async () => {
+      const data = { title: "SolTides", text: "Connect with SolTides", url: "https://soltides.co/card" };
+      try {
+        if (navigator.share) await navigator.share(data);
+        else {
+          await navigator.clipboard.writeText(data.url);
+          shareStatus.textContent = "Link copied";
+          setTimeout(() => { shareStatus.textContent = ""; }, 2500);
+        }
+      } catch (error) {
+        if (error.name !== "AbortError") shareStatus.textContent = "Use soltides.co/card";
+      }
+    });
+  </script>
+</body>
+</html>

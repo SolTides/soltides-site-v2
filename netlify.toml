@@ -10,6 +10,11 @@
 [functions."expire-orders"]
   schedule = "*/15 * * * *"
 
+[[redirects]]
+  from = "/card"
+  to = "/card.html"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]
