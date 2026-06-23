@@ -9,6 +9,7 @@ SUPABASE_URL=https://lcofklilvaatcorvfucz.supabase.co
 SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 SUPABASE_SERVICE_ROLE_KEY=paste-service-role-key-in-netlify-only
 EMAILJS_PUBLIC_KEY=your-emailjs-public-key
+EMAILJS_PRIVATE_KEY=your-emailjs-private-key
 EMAILJS_SERVICE_ID=your-emailjs-service-id
 EMAILJS_ORDER_TEMPLATE_ID=your-emailjs-order-template-id
 OWNER_EMAIL=info@soltides.co
