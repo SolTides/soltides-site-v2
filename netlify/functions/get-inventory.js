@@ -9,7 +9,7 @@ exports.handler = async function handler(event) {
       ...row,
       stock_status: !row.enabled ? "out_of_stock"
         : row.availability_status !== "auto" ? row.availability_status
-        : row.stock === 0 ? "out_of_stock"
+        : row.stock === 0 ? "coming_soon"
         : row.stock <= row.low_stock_threshold ? "low_stock"
         : "in_stock"
     }));

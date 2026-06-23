@@ -70,9 +70,9 @@ export function stockLabel(p) {
   const stock = stockNumber(p);
   const showCount = showStockCount(p);
   if (!isVisible(p)) return "Unavailable";
+  if (status === "coming_soon") return "Coming soon";
   if (status === "out_of_stock" || status === "out" || stock === 0) return "Out of stock";
   if (status === "low_stock" || status === "low") return showCount && stock !== null ? `Low stock • ${stock} left` : "Low stock";
-  if (status === "coming_soon") return "Coming soon";
   if (status === "limited") return showCount && stock !== null ? `Limited • ${stock} available` : "Limited availability";
   return showCount && stock !== null ? `In stock • ${stock} available` : "In stock";
 }
