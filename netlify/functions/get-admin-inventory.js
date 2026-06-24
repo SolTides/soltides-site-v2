@@ -7,7 +7,13 @@ exports.handler = async function handler(event) {
   if (!token) return json(401, { error: "Missing admin session." });
   try {
     const inventory = await supabaseFetch("inventory?select=*&order=product_id", { token });
-    return json(200, { inventory: inventory || [] });
+    let variants = [];
+    try {
+      variants = await supabaseFetch("product_variants?select=*&order=product_id,sort_order,option_label", { token });
+    } catch (error) {
+      if (!/product_variants|PGRST205|42P01/i.test(String(error?.message || error))) throw error;
+    }
+    return json(200, { inventory: inventory || [], variants: variants || [] });
   } catch (error) {
     console.error(error);
     return json(403, { error: "Could not load inventory." });

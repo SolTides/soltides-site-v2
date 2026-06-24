@@ -53,38 +53,86 @@ window.loadInventory = async function loadInventory() {
     const payload = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(payload.error || "Could not load inventory.");
     const rows = payload.inventory || [];
-    msg.textContent = `${rows.length} products. Changes take effect on the store immediately.`;
-    grid.innerHTML = rows.map(inventoryRow).join("");
+    const variants = payload.variants || [];
+    const variantsByProduct = new Map();
+    for (const variant of variants) {
+      const list = variantsByProduct.get(variant.product_id) || [];
+      list.push(variant);
+      variantsByProduct.set(variant.product_id, list);
+    }
+    msg.textContent = `${rows.length} products and ${variants.length} vial sizes. Changes take effect on the store immediately.`;
+    grid.innerHTML = `${variantCreator(rows)}${rows.map(row => `
+      <section class="inventory-product">
+        <div class="inventory-product-head"><h3>${esc(row.product_id)}</h3><span>${(variantsByProduct.get(row.product_id) || []).length} vial size${(variantsByProduct.get(row.product_id) || []).length === 1 ? "" : "s"}</span></div>
+        ${inventoryRow(row)}
+        ${(variantsByProduct.get(row.product_id) || []).map(variantRow).join("") || '<p class="admin-muted inventory-empty">No separate vial-size stock yet. This product uses fallback stock.</p>'}
+      </section>`).join("")}`;
+    grid.querySelectorAll('[data-action="save-inventory"]').forEach(button => button.addEventListener("click", () => saveInventoryRow(button)));
+    document.getElementById("addVariantForm")?.addEventListener("submit", addVariant);
   } catch (error) {
     msg.textContent = error.message;
   }
 };
 
 function inventoryRow(row) {
-  return `<article class="inventory-row" data-product-id="${esc(row.product_id)}">
-    <strong>${esc(row.product_id)}</strong>
-    <label>On hand<input data-inventory="stock" type="number" min="0" step="1" value="${esc(row.stock)}"></label>
+  return `<article class="inventory-row inventory-base" data-kind="base" data-product-id="${esc(row.product_id)}" data-option-label="">
+    <strong>Product settings</strong>
+    <label>Fallback stock<input data-inventory="stock" type="number" min="0" step="1" value="${esc(row.stock)}"></label>
     <label>Availability<select data-inventory="availability_status">
       ${["auto", "out_of_stock", "coming_soon", "limited", "hidden"].map(v => `<option value="${v}" ${row.availability_status === v ? "selected" : ""}>${v.replaceAll("_", " ")}</option>`).join("")}
     </select></label>
     <label>Low at<input data-inventory="low_stock_threshold" type="number" min="0" step="1" value="${esc(row.low_stock_threshold)}"></label>
     <label class="inventory-check"><input data-inventory="enabled" type="checkbox" ${row.enabled ? "checked" : ""}> Store enabled</label>
     <label class="inventory-check"><input data-inventory="show_stock_count" type="checkbox" ${row.show_stock_count ? "checked" : ""}> Show count</label>
-    <button class="admin-small-btn" type="button" onclick="saveInventory('${esc(row.product_id)}')">Save stock</button>
+    <button class="admin-small-btn" data-action="save-inventory" type="button">Save product</button>
   </article>`;
 }
 
-window.saveInventory = async function saveInventory(productId) {
-  const row = document.querySelector(`[data-product-id="${CSS.escape(productId)}"]`);
+function variantRow(row) {
+  return `<article class="inventory-row inventory-variant" data-kind="variant" data-product-id="${esc(row.product_id)}" data-option-label="${esc(row.option_label)}">
+    <strong>${esc(row.option_label)}</strong>
+    <label>On hand<input data-inventory="stock" type="number" min="0" step="1" value="${esc(row.stock)}"></label>
+    <label>Price ($)<input data-inventory="price" type="number" min="0" step="0.01" value="${row.price === null ? "" : esc(row.price)}" placeholder="Required to sell"></label>
+    <label>Availability<select data-inventory="availability_status">
+      ${["auto", "out_of_stock", "coming_soon", "limited", "hidden"].map(v => `<option value="${v}" ${row.availability_status === v ? "selected" : ""}>${v.replaceAll("_", " ")}</option>`).join("")}
+    </select></label>
+    <label>Low at<input data-inventory="low_stock_threshold" type="number" min="0" step="1" value="${esc(row.low_stock_threshold)}"></label>
+    <label class="inventory-check"><input data-inventory="enabled" type="checkbox" ${row.enabled ? "checked" : ""}> Vial enabled</label>
+    <label class="inventory-check"><input data-inventory="show_stock_count" type="checkbox" ${row.show_stock_count ? "checked" : ""}> Show count</label>
+    <label>Order<input data-inventory="sort_order" type="number" step="1" value="${esc(row.sort_order || 0)}"></label>
+    <button class="admin-small-btn" data-action="save-inventory" type="button">Save vial</button>
+  </article>`;
+}
+
+function variantCreator(products) {
+  return `<form class="inventory-add" id="addVariantForm">
+    <div><strong>Add a vial size</strong><p class="admin-muted">Add another mg option without changing website code.</p></div>
+    <label>Product<select name="product_id" required>${products.map(row => `<option value="${esc(row.product_id)}">${esc(row.product_id)}</option>`).join("")}</select></label>
+    <label>Vial size<input name="option_label" required maxlength="80" placeholder="Example: 20mg"></label>
+    <label>Price ($)<input name="price" type="number" min="0" step="0.01" required></label>
+    <label>Starting stock<input name="stock" type="number" min="0" step="1" value="0" required></label>
+    <label>Display order<input name="sort_order" type="number" step="1" value="0"></label>
+    <button class="admin-small-btn" type="submit">Add vial size</button>
+  </form>`;
+}
+
+async function saveInventoryRow(button) {
+  const row = button.closest(".inventory-row");
   if (!row) return;
+  const isVariant = row.dataset.kind === "variant";
   const body = {
-    product_id: productId,
+    product_id: row.dataset.productId,
+    option_label: row.dataset.optionLabel || "",
     stock: Number(row.querySelector('[data-inventory="stock"]').value),
+    price: isVariant ? row.querySelector('[data-inventory="price"]').value : undefined,
     availability_status: row.querySelector('[data-inventory="availability_status"]').value,
     low_stock_threshold: Number(row.querySelector('[data-inventory="low_stock_threshold"]').value),
     enabled: row.querySelector('[data-inventory="enabled"]').checked,
-    show_stock_count: row.querySelector('[data-inventory="show_stock_count"]').checked
+    show_stock_count: row.querySelector('[data-inventory="show_stock_count"]').checked,
+    sort_order: isVariant ? Number(row.querySelector('[data-inventory="sort_order"]').value) : 0
   };
+  button.disabled = true;
+  button.textContent = "Saving...";
   try {
     const res = await fetch(CONFIG.updateInventoryEndpoint, {
       method: "POST",
@@ -94,8 +142,47 @@ window.saveInventory = async function saveInventory(productId) {
     const payload = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(payload.error || "Could not update inventory.");
     await loadInventory();
-  } catch (error) { alert(error.message); }
-};
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = isVariant ? "Save vial" : "Save product";
+    alert(error.message);
+  }
+}
+
+async function addVariant(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const button = form.querySelector('button[type="submit"]');
+  const data = new FormData(form);
+  const body = {
+    create: true,
+    product_id: String(data.get("product_id") || "").trim(),
+    option_label: String(data.get("option_label") || "").trim(),
+    price: data.get("price"),
+    stock: Number(data.get("stock")),
+    sort_order: Number(data.get("sort_order") || 0),
+    availability_status: "auto",
+    low_stock_threshold: 5,
+    enabled: true,
+    show_stock_count: false
+  };
+  button.disabled = true;
+  button.textContent = "Adding...";
+  try {
+    const res = await fetch(CONFIG.updateInventoryEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(await authHeaders()) },
+      body: JSON.stringify(body)
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(payload.error || "Could not add vial size.");
+    await loadInventory();
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = "Add vial size";
+    alert(error.message);
+  }
+}
 
 window.loadOrders = async function loadOrders() {
   const grid = document.getElementById("ordersGrid");
