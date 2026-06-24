@@ -44,8 +44,17 @@ export function stockNumber(p) {
   return Number.isFinite(n) ? n : null;
 }
 
+export function optionStockNumber(option) {
+  const n = Number(option?.stock);
+  return Number.isFinite(n) ? n : null;
+}
+
 export function normalizeStatus(p) {
   return String(p?.stock_status || "in_stock").trim().toLowerCase().replace(/[\s-]+/g, "_");
+}
+
+export function normalizeOptionStatus(option) {
+  return String(option?.stock_status || "in_stock").trim().toLowerCase().replace(/[\s-]+/g, "_");
 }
 
 function truthyToggle(v) {
@@ -62,7 +71,25 @@ export function isVisible(p) {
 
 export function isAvailable(p) {
   const status = normalizeStatus(p);
-  return isVisible(p) && status !== "out_of_stock" && status !== "out" && stockNumber(p) !== 0;
+  if (p?.inventory_variants) {
+    return isVisible(p)
+      && !["out_of_stock", "out", "coming_soon", "hidden"].includes(status)
+      && (p.mg_options || []).some(isOptionAvailable);
+  }
+  return isVisible(p) && !["out_of_stock", "out", "coming_soon", "hidden"].includes(status) && stockNumber(p) !== 0;
+}
+
+export function isOptionAvailable(option) {
+  const status = normalizeOptionStatus(option);
+  const stock = optionStockNumber(option);
+  return option?.enabled !== false
+    && Number.isFinite(Number(option?.price))
+    && !["out_of_stock", "out", "coming_soon", "hidden"].includes(status)
+    && stock !== 0;
+}
+
+export function productOption(p, label) {
+  return (p?.mg_options || []).find(option => String(option.label) === String(label)) || (p?.mg_options || [])[0] || null;
 }
 
 export function stockLabel(p) {
@@ -172,9 +199,50 @@ async function overlayInventory(products) {
   if (!res.ok) throw new Error(`Inventory fetch failed ${res.status}`);
   const payload = await res.json();
   const byId = new Map((payload.inventory || []).map(row => [row.product_id, row]));
+  const variantsById = new Map();
+  for (const row of payload.variants || []) {
+    const rows = variantsById.get(row.product_id) || [];
+    rows.push(row);
+    variantsById.set(row.product_id, rows);
+  }
   return products.map(product => {
     const inventory = byId.get(product.id || product.slug);
     if (!inventory) return { ...product, stock: 0, stock_status: "out_of_stock" };
+    const variantRows = variantsById.get(product.id || product.slug) || [];
+    if (variantRows.length) {
+      const catalogOptions = new Map((product.mg_options || []).map(option => [String(option.label), option]));
+      const options = variantRows
+        .filter(row => row.enabled && row.availability_status !== "hidden" && row.price !== null)
+        .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0) || String(a.option_label).localeCompare(String(b.option_label)))
+        .map(row => ({
+          label: row.option_label,
+          price: Number(row.price ?? catalogOptions.get(String(row.option_label))?.price ?? product.price ?? 0),
+          stock: Number(row.stock),
+          stock_status: row.stock_status,
+          enabled: row.enabled,
+          show_stock_count: row.show_stock_count
+        }));
+      const availableOptions = options.filter(isOptionAvailable);
+      const explicitProductStatus = inventory.availability_status !== "auto" ? inventory.availability_status : "";
+      const stockStatus = !inventory.enabled ? "out_of_stock"
+        : explicitProductStatus ? explicitProductStatus
+        : availableOptions.length
+          ? (availableOptions.every(option => ["low_stock", "limited"].includes(normalizeOptionStatus(option))) ? "low_stock" : "in_stock")
+          : options.some(option => normalizeOptionStatus(option) === "coming_soon") ? "coming_soon"
+          : "out_of_stock";
+      const prices = options.map(option => Number(option.price)).filter(Number.isFinite);
+      return {
+        ...product,
+        mg_options: options,
+        inventory_variants: true,
+        stock: options.reduce((sum, option) => sum + Math.max(0, optionStockNumber(option) || 0), 0),
+        stock_status: stockStatus,
+        show_stock_count: inventory.show_stock_count ? "yes" : "no",
+        visible: stockStatus === "hidden" ? "no" : product.visible,
+        price: prices.length ? Math.min(...prices) : Number(product.price || 0),
+        spec: options.length ? options.map(option => option.label).join(" / ") : product.spec
+      };
+    }
     return {
       ...product,
       stock: inventory.stock,
@@ -201,7 +269,10 @@ export async function loadProducts() {
     console.error("Live inventory unavailable; checkout has been disabled to prevent overselling.", error);
     state.products = state.products.map(product => ({ ...product, stock: 0, stock_status: "out_of_stock" }));
   }
-  state.cart = state.cart.filter(item => state.products.some(p => p.id === item.id && isAvailable(p)));
+  state.cart = state.cart.filter(item => state.products.some(p => {
+    if (p.id !== item.id || !isAvailable(p)) return false;
+    return !p.inventory_variants || isOptionAvailable(productOption(p, item.mgLabel));
+  }));
   saveCart();
 }
 

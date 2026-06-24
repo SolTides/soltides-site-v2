@@ -132,6 +132,18 @@ exports.handler = async function handler(event) {
 
     const catalog = await loadCatalog();
     const byId = new Map(catalog.map(p => [p.id || p.slug, p]));
+    let inventoryVariants = [];
+    try {
+      inventoryVariants = await supabaseFetch("product_variants?select=product_id,option_label,price,stock,availability_status,enabled", { write: true });
+    } catch (error) {
+      if (!/product_variants|PGRST205|42P01/i.test(String(error?.message || error))) throw error;
+    }
+    const variantsByProduct = new Map();
+    for (const variant of inventoryVariants || []) {
+      const rows = variantsByProduct.get(variant.product_id) || [];
+      rows.push(variant);
+      variantsByProduct.set(variant.product_id, rows);
+    }
     const lines = [];
 
     for (const item of body.cart) {
@@ -145,9 +157,20 @@ exports.handler = async function handler(event) {
       if (!product || String(product.visible || "yes").toLowerCase() === "no") {
         return json(400, { error: "One or more products is unavailable." });
       }
-      const option = (product.mg_options || []).find(o => String(o.label) === mgLabel) || (product.mg_options || [])[0];
-      if (!option) return json(400, { error: "Invalid product option." });
-      const unitPrice = Number(option.price || product.price || 0);
+      const inventoryOptions = variantsByProduct.get(id) || [];
+      let option;
+      if (inventoryOptions.length) {
+        const variant = inventoryOptions.find(row => String(row.option_label) === mgLabel);
+        const blockedStatuses = new Set(["out_of_stock", "coming_soon", "hidden"]);
+        if (!variant || !variant.enabled || variant.price === null || blockedStatuses.has(String(variant.availability_status)) || Number(variant.stock) < qty) {
+          return json(400, { error: "That vial size is currently unavailable." });
+        }
+        option = { label: variant.option_label, price: Number(variant.price) };
+      } else {
+        option = (product.mg_options || []).find(o => String(o.label) === mgLabel) || (product.mg_options || [])[0];
+      }
+      if (!option || !Number.isFinite(Number(option.price))) return json(400, { error: "Invalid product option." });
+      const unitPrice = Number(option.price);
       const lineTotal = unitPrice * qty;
       const actual = product.actual ? ` — ${product.actual}` : "";
       lines.push({

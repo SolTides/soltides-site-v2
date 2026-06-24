@@ -1,6 +1,6 @@
 import { state, saveCart } from "./state.js";
 import { esc, money } from "./utils.js";
-import { imageSrc, isAvailable, stockNumber } from "./products.js";
+import { imageSrc, isAvailable, isOptionAvailable, optionStockNumber, productOption, stockNumber } from "./products.js";
 
 export function openCart() {
   document.getElementById("cartPanel")?.classList.add("open");
@@ -13,12 +13,13 @@ export function closeCart() {
 export function addToCart(id, qty = 1, mgLabel = null, unitPrice = null) {
   const p = state.products.find(x => x.id === id);
   if (!p) return;
-  if (!isAvailable(p)) { alert("This product is currently out of stock."); return; }
   const label = mgLabel || p.mg_options[0].label;
-  const price = unitPrice || p.mg_options[0].price;
+  const option = productOption(p, label);
+  if (!isAvailable(p) || (p.inventory_variants && !isOptionAvailable(option))) { alert("This vial size is currently unavailable."); return; }
+  const price = unitPrice ?? option?.price ?? p.mg_options[0].price;
   const key = `${id}|${label}`;
-  const maxStock = stockNumber(p);
-  const currentQty = state.cart.filter(i => i.id === id).reduce((s, i) => s + i.qty, 0);
+  const maxStock = p.inventory_variants ? optionStockNumber(option) : stockNumber(p);
+  const currentQty = state.cart.filter(i => p.inventory_variants ? i.key === key : i.id === id).reduce((s, i) => s + i.qty, 0);
   if (maxStock !== null && currentQty + qty > maxStock) {
     alert("That quantity is not currently available. Please lower the quantity or contact SolTides.");
     return;
@@ -38,9 +39,10 @@ export function changeQty(key, amount) {
   const item = state.cart.find(i => i.key === key);
   if (!item) return;
   const p = state.products.find(x => x.id === item.id);
-  const maxStock = stockNumber(p || {});
+  const option = productOption(p, item.mgLabel);
+  const maxStock = p?.inventory_variants ? optionStockNumber(option) : stockNumber(p || {});
   if (amount > 0 && maxStock !== null) {
-    const currentQty = state.cart.filter(i => i.id === item.id).reduce((s, i) => s + i.qty, 0);
+    const currentQty = state.cart.filter(i => p?.inventory_variants ? i.key === item.key : i.id === item.id).reduce((s, i) => s + i.qty, 0);
     if (currentQty + amount > maxStock) {
       alert("That quantity is not currently available. Please lower the quantity or contact SolTides.");
       return;

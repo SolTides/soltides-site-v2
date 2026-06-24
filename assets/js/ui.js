@@ -1,7 +1,7 @@
 import { state } from "./state.js";
 import { esc, money } from "./utils.js";
 import { addToCart } from "./cart.js";
-import { currentProduct, imageSrc, labSrc, isVisible, isAvailable, stockClass, stockLabel, stockNumber, showStockCount } from "./products.js";
+import { currentProduct, imageSrc, isAvailable, isOptionAvailable, labSrc, normalizeOptionStatus, optionStockNumber, productOption, stockClass, stockLabel, stockNumber, isVisible } from "./products.js";
 
 export function renderHeroProductImage() {
   const img = document.getElementById("heroProductImage");
@@ -58,20 +58,20 @@ export function renderProductPage() {
   }
   const mg = document.getElementById("mgSelect");
   if (mg) {
-    mg.innerHTML = p.mg_options.map((o, i) => `<option value="${i}" data-price="${o.price}">${esc(o.label)}</option>`).join("");
-    mg.addEventListener("change", updateProductPrice);
+    mg.innerHTML = (p.mg_options || []).map((o, i) => {
+      const suffix = p.inventory_variants && !isOptionAvailable(o)
+        ? ` â€” ${normalizeOptionStatus(o) === "coming_soon" ? "Coming soon" : "Unavailable"}`
+        : "";
+      return `<option value="${i}" data-price="${o.price}">${esc(o.label + suffix)}</option>`;
+    }).join("");
+    mg.disabled = !(p.mg_options || []).length;
+    const firstAvailable = (p.mg_options || []).findIndex(option => !p.inventory_variants || isOptionAvailable(option));
+    if (firstAvailable >= 0) mg.value = String(firstAvailable);
+    mg.addEventListener("change", updateProductSelection);
   }
   const qty = document.getElementById("qtySelect");
-  if (qty) {
-    const maxStock = stockNumber(p);
-    const maxQty = isAvailable(p) ? Math.max(1, Math.min(10, maxStock || 10)) : 0;
-    qty.innerHTML = maxQty > 0 ? Array.from({ length: maxQty }, (_, i) => i + 1).map(n => `<option value="${n}">${n} ${n === 1 ? 'vial' : 'vials'}</option>`).join("") : `<option value="0">Unavailable</option>`;
-    qty.disabled = maxQty === 0;
-    qty.addEventListener("change", updateProductPrice);
-  }
-  const addBtn = [...document.querySelectorAll("button")].find(b => b.textContent.trim().toLowerCase() === "add to cart");
-  if (addBtn && !isAvailable(p)) { addBtn.disabled = true; addBtn.textContent = "Out of Stock"; }
-  updateProductPrice();
+  qty?.addEventListener("change", updateProductPrice);
+  updateProductSelection();
   const lab = document.getElementById("labImage");
   const ph = document.getElementById("labPlaceholder");
   if (lab) {
@@ -99,10 +99,45 @@ export function updateProductPrice() {
   const mg = document.getElementById("mgSelect");
   const qty = document.getElementById("qtySelect");
   const priceEl = document.getElementById("productLivePrice");
-  const opt = p.mg_options[Number(mg?.value || 0)] || p.mg_options[0];
+  const opt = p.mg_options?.[Number(mg?.value || 0)] || p.mg_options?.[0];
   const q = Number(qty?.value || 1);
-  const total = opt.price * q;
-  if (priceEl) priceEl.textContent = isAvailable(p) ? `$${money(total)}` : "Unavailable";
+  const total = Number(opt?.price || 0) * q;
+  const available = isAvailable(p) && (!p.inventory_variants || isOptionAvailable(opt));
+  if (priceEl) priceEl.textContent = available ? `$${money(total)}` : "Unavailable";
+}
+
+export function updateProductSelection() {
+  const p = currentProduct();
+  if (!p) return;
+  const mg = document.getElementById("mgSelect");
+  const qty = document.getElementById("qtySelect");
+  const opt = p.mg_options?.[Number(mg?.value || 0)] || p.mg_options?.[0] || null;
+  const available = isAvailable(p) && (!p.inventory_variants || isOptionAvailable(opt));
+  const maxStock = p.inventory_variants ? optionStockNumber(opt) : stockNumber(p);
+  const maxQty = available ? Math.max(1, Math.min(10, maxStock || 10)) : 0;
+  if (qty) {
+    qty.innerHTML = maxQty > 0
+      ? Array.from({ length: maxQty }, (_, i) => i + 1).map(n => `<option value="${n}">${n} ${n === 1 ? "vial" : "vials"}</option>`).join("")
+      : `<option value="0">Unavailable</option>`;
+    qty.disabled = maxQty === 0;
+  }
+
+  const statusSource = p.inventory_variants && opt
+    ? { ...p, stock: opt.stock, stock_status: opt.stock_status, show_stock_count: opt.show_stock_count ? "yes" : "no" }
+    : p;
+  const badge = document.getElementById("productStockBadge");
+  if (badge) {
+    badge.className = `stock-badge ${stockClass(statusSource)} product-page-stock`;
+    badge.textContent = stockLabel(statusSource);
+  }
+
+  const addBtn = [...document.querySelectorAll("button")].find(button => button.dataset.originalAddButton === "true" || button.textContent.trim().toLowerCase() === "add to cart");
+  if (addBtn) {
+    addBtn.dataset.originalAddButton = "true";
+    addBtn.disabled = !available;
+    addBtn.textContent = available ? "Add to Cart" : normalizeOptionStatus(opt) === "coming_soon" ? "Coming Soon" : "Out of Stock";
+  }
+  updateProductPrice();
 }
 
 export function addSelectedProduct() {
@@ -111,7 +146,8 @@ export function addSelectedProduct() {
   if (!isAvailable(p)) { alert("This product is currently out of stock."); return; }
   const mg = document.getElementById("mgSelect");
   const qty = document.getElementById("qtySelect");
-  const opt = p.mg_options[Number(mg?.value || 0)] || p.mg_options[0];
+  const opt = p.mg_options?.[Number(mg?.value || 0)] || productOption(p, "");
+  if (!opt || (p.inventory_variants && !isOptionAvailable(opt))) { alert("This vial size is currently unavailable."); return; }
   const q = Number(qty?.value || 1);
   addToCart(p.id, q, opt.label, opt.price);
 }
