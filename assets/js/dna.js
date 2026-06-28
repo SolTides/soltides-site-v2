@@ -25,7 +25,6 @@ import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
     const group = new THREE.Group();
     group.rotation.z = 0.01;
-    group.scale.set(0.90, 0.90, 0.90);
     scene.add(group);
 
     function makeGoldGradientTexture() {
@@ -234,6 +233,11 @@ import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
       const rect = wrap.getBoundingClientRect();
       renderer.setSize(rect.width, rect.height, false);
       camera.aspect = rect.width / rect.height;
+      const viewportScale = window.innerWidth >= 1500
+        ? 0.90
+        : THREE.MathUtils.mapLinear(window.innerWidth, 900, 1500, 0.52, 0.90);
+      const dnaScale = THREE.MathUtils.clamp(viewportScale, 0.52, 0.90);
+      group.scale.set(dnaScale, dnaScale, dnaScale);
       camera.updateProjectionMatrix();
     }
 
