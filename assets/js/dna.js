@@ -13,7 +13,7 @@ import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
       powerPreference: "high-performance"
     });
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2.25));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -129,10 +129,13 @@ import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
       specularColor: new THREE.Color(0xffffff)
     });
 
-    const turns = 3.55;
-    const height = 9.55;
+    const turns = 5.1;
+    const height = 13.8;
     const radius = 0.64;
     const strandOffsetY = 0.34;
+    const curvePoints = 620;
+    const tubeSegments = 820;
+    const radialSegments = 64;
 
     function pointOnHelix(t, phase = 0, yShift = 0) {
       const a = t * Math.PI * 2 * turns + phase;
@@ -146,21 +149,21 @@ import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
     function helixCurve(phase = 0, yShift = 0) {
       return new THREE.CatmullRomCurve3(
-        Array.from({ length: 860 }, (_, i) => {
-          const t = i / 859;
+        Array.from({ length: curvePoints }, (_, i) => {
+          const t = i / (curvePoints - 1);
           return pointOnHelix(t, phase, yShift);
         })
       );
     }
 
-    // Higher geometry density for smoother rails and cleaner specular highlights.
+    // Balanced geometry: long enough to pass the viewport, light enough for a decorative rail.
     const strand1 = new THREE.Mesh(
-      new THREE.TubeGeometry(helixCurve(0, 0), 1550, 0.135, 192, false),
+      new THREE.TubeGeometry(helixCurve(0, 0), tubeSegments, 0.135, radialSegments, false),
       railMaterialA
     );
 
     const strand2 = new THREE.Mesh(
-      new THREE.TubeGeometry(helixCurve(Math.PI, strandOffsetY), 1550, 0.135, 192, false),
+      new THREE.TubeGeometry(helixCurve(Math.PI, strandOffsetY), tubeSegments, 0.135, radialSegments, false),
       railMaterialB
     );
 
@@ -173,19 +176,31 @@ import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
       const fullDir = new THREE.Vector3().subVectors(end, start);
       const len = fullDir.length();
       const body = Math.max(0.001, len - radius * 2);
-      const mesh = new THREE.Mesh(new THREE.CapsuleGeometry(radius, body, 36, 96), material);
+      const mesh = new THREE.Mesh(new THREE.CapsuleGeometry(radius, body, 18, 48), material);
       mesh.position.addVectors(start, end).multiplyScalar(0.5);
       mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), fullDir.normalize());
       group.add(mesh);
       return mesh;
     }
 
-    for (let i = 0; i <= 18; i++) {
-      const t = i / 18;
+    const rungCount = 25;
+    const jointGeometry = new THREE.SphereGeometry(0.096, 18, 12);
+    const jointFillets = new THREE.InstancedMesh(jointGeometry, rungMaterial, (rungCount + 1) * 2);
+    const jointMatrix = new THREE.Matrix4();
+    let jointIndex = 0;
+
+    for (let i = 0; i <= rungCount; i++) {
+      const t = i / rungCount;
       const p1 = pointOnHelix(t, 0, 0);
       const p2 = pointOnHelix(t, Math.PI, strandOffsetY);
-      capsuleBetween(p1, p2, 0.064, rungMaterial, 0.055);
+      capsuleBetween(p1, p2, 0.074, rungMaterial, 0.12);
+      jointMatrix.makeTranslation(p1.x, p1.y, p1.z);
+      jointFillets.setMatrixAt(jointIndex++, jointMatrix);
+      jointMatrix.makeTranslation(p2.x, p2.y, p2.z);
+      jointFillets.setMatrixAt(jointIndex++, jointMatrix);
     }
+    jointFillets.instanceMatrix.needsUpdate = true;
+    group.add(jointFillets);
 
     const angle = THREE.MathUtils.degToRad(15);
     function rotateRight(x, y, z) {
@@ -228,6 +243,7 @@ import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
     let targetRot = 0;
     let currentRot = 0;
     let lastScrollY = window.scrollY;
+    let animationFrame = 0;
 
     function resize() {
       const rect = wrap.getBoundingClientRect();
@@ -252,13 +268,23 @@ import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
       group.rotation.y = currentRot;
       group.rotation.x = -0.02 + Math.sin(lastScrollY * 0.0009) * 0.010;
       renderer.render(scene, camera);
-      requestAnimationFrame(animate);
+      animationFrame = requestAnimationFrame(animate);
+    }
+
+    function syncAnimation() {
+      if (document.hidden) {
+        cancelAnimationFrame(animationFrame);
+        animationFrame = 0;
+      } else if (!animationFrame) {
+        animate();
+      }
     }
 
     window.addEventListener("resize", resize);
     window.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("visibilitychange", syncAnimation);
 
     resize();
     onScroll();
-    animate();
+    syncAnimation();
   }
