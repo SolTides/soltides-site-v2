@@ -4,12 +4,31 @@ import { esc, money } from "./utils.js";
 
 const supabase = createClient(CONFIG.supabaseUrl, CONFIG.supabasePublishableKey);
 const fmtDate = v => v ? new Date(v).toLocaleString() : "";
+const ADMIN_VERSION = "v5";
 
 async function authHeaders() {
   const { data } = await supabase.auth.getSession();
   const token = data?.session?.access_token;
   if (!token) throw new Error("Please log in again.");
   return { Authorization: `Bearer ${token}` };
+}
+
+function withBust(url) {
+  const joiner = url.includes("?") ? "&" : "?";
+  return `${url}${joiner}v=${encodeURIComponent(ADMIN_VERSION)}&ts=${Date.now()}`;
+}
+
+async function fetchAdminJson(url, init = {}) {
+  const headers = {
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+    Pragma: "no-cache",
+    Expires: "0",
+    ...(init.headers || {})
+  };
+  const res = await fetch(withBust(url), { ...init, cache: "no-store", headers });
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(payload.error || "Request failed.");
+  return payload;
 }
 
 window.login = async function login(e) {
@@ -48,10 +67,9 @@ window.loadInventory = async function loadInventory() {
   const grid = document.getElementById("inventoryGrid");
   const msg = document.getElementById("inventoryMessage");
   msg.textContent = "Loading inventory...";
+  grid.innerHTML = "";
   try {
-    const res = await fetch(CONFIG.adminInventoryEndpoint, { headers: await authHeaders() });
-    const payload = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(payload.error || "Could not load inventory.");
+    const payload = await fetchAdminJson(CONFIG.adminInventoryEndpoint, { headers: await authHeaders() });
     const rows = payload.inventory || [];
     const variants = payload.variants || [];
     const variantsByProduct = new Map();
@@ -70,7 +88,7 @@ window.loadInventory = async function loadInventory() {
     grid.querySelectorAll('[data-action="save-inventory"]').forEach(button => button.addEventListener("click", () => saveInventoryRow(button)));
     document.getElementById("addVariantForm")?.addEventListener("submit", addVariant);
   } catch (error) {
-    msg.textContent = error.message;
+    msg.textContent = `${error.message} Admin ${ADMIN_VERSION}.`;
   }
 };
 
@@ -136,7 +154,8 @@ async function saveInventoryRow(button) {
   try {
     const res = await fetch(CONFIG.updateInventoryEndpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...(await authHeaders()) },
+      cache: "no-store",
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-cache", ...(await authHeaders()) },
       body: JSON.stringify(body)
     });
     const payload = await res.json().catch(() => ({}));
@@ -171,7 +190,8 @@ async function addVariant(event) {
   try {
     const res = await fetch(CONFIG.updateInventoryEndpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...(await authHeaders()) },
+      cache: "no-store",
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-cache", ...(await authHeaders()) },
       body: JSON.stringify(body)
     });
     const payload = await res.json().catch(() => ({}));
@@ -191,9 +211,7 @@ window.loadOrders = async function loadOrders() {
   grid.innerHTML = "";
 
   try {
-    const res = await fetch(CONFIG.adminOrdersEndpoint, { headers: await authHeaders() });
-    const payload = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(payload.error || "Could not load orders.");
+    const payload = await fetchAdminJson(CONFIG.adminOrdersEndpoint, { headers: await authHeaders() });
     const data = payload.orders || [];
     if (!data.length) { msg.textContent = "No orders yet."; return; }
     msg.textContent = `${data.length} recent order${data.length === 1 ? "" : "s"}.`;
@@ -278,7 +296,8 @@ window.saveOrderUpdate = async function saveOrderUpdate(id) {
   try {
     const res = await fetch(CONFIG.updateOrderEndpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...(await authHeaders()) },
+      cache: "no-store",
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-cache", ...(await authHeaders()) },
       body: JSON.stringify(body)
     });
     const payload = await res.json().catch(() => ({}));
