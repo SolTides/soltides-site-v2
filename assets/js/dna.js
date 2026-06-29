@@ -233,10 +233,11 @@ import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
       const rect = wrap.getBoundingClientRect();
       renderer.setSize(rect.width, rect.height, false);
       camera.aspect = rect.width / rect.height;
-      const viewportScale = window.innerWidth >= 1500
-        ? 0.90
-        : THREE.MathUtils.mapLinear(window.innerWidth, 900, 1500, 0.52, 0.90);
-      const dnaScale = THREE.MathUtils.clamp(viewportScale, 0.52, 0.90);
+      const visibleHeight = 2 * camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+      const visibleWidth = visibleHeight * camera.aspect;
+      const horizontalFit = visibleWidth / 2.35;
+      const preferredScale = THREE.MathUtils.mapLinear(rect.width, 92, 240, 0.34, 0.72);
+      const dnaScale = THREE.MathUtils.clamp(Math.min(preferredScale, horizontalFit), 0.30, 0.72);
       group.scale.set(dnaScale, dnaScale, dnaScale);
       camera.updateProjectionMatrix();
     }
