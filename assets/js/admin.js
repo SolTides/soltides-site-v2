@@ -4,7 +4,9 @@ import { esc, money } from "./utils.js";
 
 const supabase = createClient(CONFIG.supabaseUrl, CONFIG.supabasePublishableKey);
 const fmtDate = v => v ? new Date(v).toLocaleString() : "";
-const ADMIN_VERSION = "v5";
+const ADMIN_VERSION = "v6";
+let currentAdminPage = "products";
+let currentOrderFilter = "new";
 
 async function authHeaders() {
   const { data } = await supabase.auth.getSession();
@@ -53,14 +55,30 @@ window.signOut = async function signOut() {
 
 async function showAdmin() {
   document.getElementById("loginBox").style.display = "none";
-  document.getElementById("ordersBox").style.display = "block";
-  document.getElementById("inventoryBox").style.display = "block";
   document.getElementById("topActions").style.display = "flex";
+  showAdminPage(currentAdminPage);
   await refreshAdmin();
 }
 
 window.refreshAdmin = async function refreshAdmin() {
   await Promise.all([loadInventory(), loadOrders()]);
+};
+
+window.showAdminPage = function showAdminPage(page) {
+  currentAdminPage = page;
+  document.getElementById("inventoryBox").style.display = page === "products" ? "block" : "none";
+  document.getElementById("ordersBox").style.display = page === "orders" ? "block" : "none";
+  document.querySelectorAll("[data-admin-page]").forEach(button => {
+    button.classList.toggle("is-active", button.dataset.adminPage === page);
+  });
+};
+
+window.setOrderFilter = async function setOrderFilter(filter) {
+  currentOrderFilter = filter;
+  document.querySelectorAll("[data-order-filter]").forEach(button => {
+    button.classList.toggle("is-active", button.dataset.orderFilter === filter);
+  });
+  await loadOrders();
 };
 
 window.loadInventory = async function loadInventory() {
@@ -213,9 +231,20 @@ window.loadOrders = async function loadOrders() {
   try {
     const payload = await fetchAdminJson(CONFIG.adminOrdersEndpoint, { headers: await authHeaders() });
     const data = payload.orders || [];
-    if (!data.length) { msg.textContent = "No orders yet."; return; }
-    msg.textContent = `${data.length} recent order${data.length === 1 ? "" : "s"}.`;
-    grid.innerHTML = data.map(orderCard).join("");
+    const newOrders = data.filter(order => order.payment_status !== "paid");
+    const paidOrders = data.filter(order => order.payment_status === "paid");
+    const visible = currentOrderFilter === "paid" ? paidOrders : currentOrderFilter === "new" ? newOrders : data;
+    if (!visible.length) {
+      msg.textContent = currentOrderFilter === "paid"
+        ? "No paid orders yet."
+        : currentOrderFilter === "new"
+          ? "No new orders right now."
+          : "No orders yet.";
+      return;
+    }
+    const label = currentOrderFilter === "paid" ? "paid" : currentOrderFilter === "new" ? "new" : "recent";
+    msg.textContent = `${visible.length} ${label} order${visible.length === 1 ? "" : "s"}.`;
+    grid.innerHTML = visible.map(orderCard).join("");
   } catch (error) {
     msg.textContent = `${error.message} Make sure your logged-in user is in public.admin_users.`;
   }

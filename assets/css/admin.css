@@ -21,6 +21,9 @@ body { background: #090909; color: #f3f0e8; min-height: 100vh; }
     .admin-small-btn { padding: 11px 14px; font-size: .9rem; }
     .admin-secondary { background: rgba(255,255,255,.10); color: #f3f0e8; border: 1px solid rgba(255,255,255,.14); }
     .admin-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .admin-tabs, .order-filter-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .admin-tab { background: rgba(255,255,255,.08); color: #f3f0e8; border: 1px solid rgba(255,255,255,.12); }
+    .admin-tab.is-active { background: linear-gradient(135deg, #d4af37, #f5dfa0); color: #111; border-color: transparent; }
     .admin-message { margin-top: 12px; color: rgba(243,240,232,.72); font-size: .92rem; line-height: 1.5; }
     .admin-pill { display: inline-block; padding: 5px 9px; border-radius: 999px; background: rgba(212,175,55,.13); color: #f5dfa0; border: 1px solid rgba(212,175,55,.25); font-size: .82rem; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; }
     .items-list { white-space: pre-wrap; line-height: 1.5; }
@@ -47,6 +50,7 @@ body { background: #090909; color: #f3f0e8; min-height: 100vh; }
       .admin-top { align-items: stretch; flex-direction: column; }
       .admin-columns, .status-controls { grid-template-columns: 1fr; }
       .inventory-add, .inventory-row, .inventory-base { grid-template-columns: 1fr 1fr; }
+      .admin-tabs, .order-filter-bar { width: 100%; }
       .admin-actions { width: 100%; }
       .admin-actions button { flex: 1; }
     }
