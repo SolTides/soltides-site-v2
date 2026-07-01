@@ -28,28 +28,36 @@ body { background: #090909; color: #f3f0e8; min-height: 100vh; }
     .admin-pill { display: inline-block; padding: 5px 9px; border-radius: 999px; background: rgba(212,175,55,.13); color: #f5dfa0; border: 1px solid rgba(212,175,55,.25); font-size: .82rem; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; }
     .items-list { white-space: pre-wrap; line-height: 1.5; }
     .admin-card h2 { margin: 0 0 10px; color: #d4af37; }
-    .inventory-grid { display: grid; gap: 10px; margin-top: 14px; }
-    .inventory-product { display: grid; gap: 10px; padding: 14px; background: rgba(0,0,0,.22); border: 1px solid rgba(212,175,55,.16); border-radius: 18px; }
+    .inventory-grid { display: grid; gap: 14px; margin-top: 14px; }
+    .inventory-product { display: grid; gap: 12px; padding: 16px; background: rgba(0,0,0,.22); border: 1px solid rgba(212,175,55,.16); border-radius: 18px; }
     .inventory-product-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .inventory-product-head h3 { margin: 0; color: #f5dfa0; text-transform: uppercase; }
     .inventory-product-head span { color: rgba(243,240,232,.58); font-size: .82rem; }
     .inventory-add { display: grid; grid-template-columns: 1.2fr repeat(5, minmax(100px, .7fr)) auto; gap: 10px; align-items: end; padding: 14px; margin-bottom: 6px; background: rgba(212,175,55,.08); border: 1px solid rgba(212,175,55,.24); border-radius: 16px; }
     .inventory-add p { margin: 4px 0 0; }
     .inventory-add label { display: grid; gap: 5px; color: rgba(243,240,232,.68); font-size: .78rem; }
-    .inventory-row { display: grid; grid-template-columns: 1.05fr .65fr .75fr 1fr .65fr .8fr .75fr .5fr auto; gap: 10px; align-items: end; padding: 12px; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; }
-    .inventory-base { grid-template-columns: 1.05fr .7fr 1fr .7fr .8fr .8fr auto; }
-    .inventory-variant { border-color: rgba(212,175,55,.14); }
+    .inventory-editor { display: grid; gap: 12px; padding: 14px; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; }
+    .inventory-editor-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .inventory-editor-top strong { display: block; color: #f5dfa0; }
+    .inventory-editor-top p { margin: 4px 0 0; max-width: 52ch; }
+    .inventory-fields { display: grid; gap: 10px; }
+    .inventory-fields-base { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .inventory-fields-variant { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .inventory-variant { border-color: rgba(212,175,55,.14); background: rgba(212,175,55,.04); }
     .inventory-empty { margin: 0; padding: 4px 8px; }
-    .inventory-row > strong { align-self: center; color: #f5dfa0; overflow-wrap: anywhere; }
-    .inventory-row label { display: grid; gap: 5px; color: rgba(243,240,232,.68); font-size: .78rem; }
-    .inventory-row input, .inventory-row select { width: 100%; min-width: 0; }
-    .inventory-row .inventory-check { display: flex; align-items: center; gap: 7px; padding-bottom: 10px; }
-    .inventory-row .inventory-check input { width: auto; }
+    .inventory-fields label { display: grid; gap: 5px; color: rgba(243,240,232,.68); font-size: .78rem; }
+    .inventory-fields label span { font-weight: 700; color: rgba(243,240,232,.82); }
+    .inventory-fields input, .inventory-fields select { width: 100%; min-width: 0; }
+    .inventory-fields .inventory-check { display: flex; align-items: center; gap: 8px; padding-top: 28px; }
+    .inventory-fields .inventory-check span { font-weight: 700; color: rgba(243,240,232,.88); }
+    .inventory-fields .inventory-check input { width: auto; }
     @media (max-width: 850px) {
       .admin-shell { margin-top: 78px; }
       .admin-top { align-items: stretch; flex-direction: column; }
       .admin-columns, .status-controls { grid-template-columns: 1fr; }
-      .inventory-add, .inventory-row, .inventory-base { grid-template-columns: 1fr 1fr; }
+      .inventory-add, .inventory-fields-base, .inventory-fields-variant { grid-template-columns: 1fr 1fr; }
+      .inventory-editor-top { flex-direction: column; align-items: stretch; }
+      .inventory-editor-top button { width: 100%; }
       .admin-tabs, .order-filter-bar { width: 100%; }
       .admin-actions { width: 100%; }
       .admin-actions button { flex: 1; }

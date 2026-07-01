@@ -4,7 +4,7 @@ import { esc, money } from "./utils.js";
 
 const supabase = createClient(CONFIG.supabaseUrl, CONFIG.supabasePublishableKey);
 const fmtDate = v => v ? new Date(v).toLocaleString() : "";
-const ADMIN_VERSION = "v6";
+const ADMIN_VERSION = "v7";
 let currentAdminPage = "products";
 let currentOrderFilter = "new";
 
@@ -111,32 +111,46 @@ window.loadInventory = async function loadInventory() {
 };
 
 function inventoryRow(row) {
-  return `<article class="inventory-row inventory-base" data-kind="base" data-product-id="${esc(row.product_id)}" data-option-label="">
-    <strong>Product settings</strong>
-    <label>Fallback stock<input data-inventory="stock" type="number" min="0" step="1" value="${esc(row.stock)}"></label>
-    <label>Availability<select data-inventory="availability_status">
-      ${["auto", "out_of_stock", "coming_soon", "limited", "hidden"].map(v => `<option value="${v}" ${row.availability_status === v ? "selected" : ""}>${v.replaceAll("_", " ")}</option>`).join("")}
-    </select></label>
-    <label>Low at<input data-inventory="low_stock_threshold" type="number" min="0" step="1" value="${esc(row.low_stock_threshold)}"></label>
-    <label class="inventory-check"><input data-inventory="enabled" type="checkbox" ${row.enabled ? "checked" : ""}> Store enabled</label>
-    <label class="inventory-check"><input data-inventory="show_stock_count" type="checkbox" ${row.show_stock_count ? "checked" : ""}> Show count</label>
-    <button class="admin-small-btn" data-action="save-inventory" type="button">Save product</button>
+  return `<article class="inventory-editor inventory-base" data-kind="base" data-product-id="${esc(row.product_id)}" data-option-label="">
+    <div class="inventory-editor-top">
+      <div>
+        <strong>Product settings</strong>
+        <p class="admin-muted">Fallback values apply only when this product has no active vial rows.</p>
+      </div>
+      <button class="admin-small-btn" data-action="save-inventory" type="button">Save product</button>
+    </div>
+    <div class="inventory-fields inventory-fields-base">
+      <label><span>Fallback stock</span><input data-inventory="stock" type="number" min="0" step="1" value="${esc(row.stock)}"></label>
+      <label><span>Availability</span><select data-inventory="availability_status">
+        ${["auto", "out_of_stock", "coming_soon", "limited", "hidden"].map(v => `<option value="${v}" ${row.availability_status === v ? "selected" : ""}>${v.replaceAll("_", " ")}</option>`).join("")}
+      </select></label>
+      <label><span>Low at</span><input data-inventory="low_stock_threshold" type="number" min="0" step="1" value="${esc(row.low_stock_threshold)}"></label>
+      <label class="inventory-check"><input data-inventory="enabled" type="checkbox" ${row.enabled ? "checked" : ""}><span>Store enabled</span></label>
+      <label class="inventory-check"><input data-inventory="show_stock_count" type="checkbox" ${row.show_stock_count ? "checked" : ""}><span>Show count</span></label>
+    </div>
   </article>`;
 }
 
 function variantRow(row) {
-  return `<article class="inventory-row inventory-variant" data-kind="variant" data-product-id="${esc(row.product_id)}" data-option-label="${esc(row.option_label)}">
-    <strong>${esc(row.option_label)}</strong>
-    <label>On hand<input data-inventory="stock" type="number" min="0" step="1" value="${esc(row.stock)}"></label>
-    <label>Price ($)<input data-inventory="price" type="number" min="0" step="0.01" value="${row.price === null ? "" : esc(row.price)}" placeholder="Required to sell"></label>
-    <label>Availability<select data-inventory="availability_status">
-      ${["auto", "out_of_stock", "coming_soon", "limited", "hidden"].map(v => `<option value="${v}" ${row.availability_status === v ? "selected" : ""}>${v.replaceAll("_", " ")}</option>`).join("")}
-    </select></label>
-    <label>Low at<input data-inventory="low_stock_threshold" type="number" min="0" step="1" value="${esc(row.low_stock_threshold)}"></label>
-    <label class="inventory-check"><input data-inventory="enabled" type="checkbox" ${row.enabled ? "checked" : ""}> Vial enabled</label>
-    <label class="inventory-check"><input data-inventory="show_stock_count" type="checkbox" ${row.show_stock_count ? "checked" : ""}> Show count</label>
-    <label>Order<input data-inventory="sort_order" type="number" step="1" value="${esc(row.sort_order || 0)}"></label>
-    <button class="admin-small-btn" data-action="save-inventory" type="button">Save vial</button>
+  return `<article class="inventory-editor inventory-variant" data-kind="variant" data-product-id="${esc(row.product_id)}" data-option-label="${esc(row.option_label)}">
+    <div class="inventory-editor-top">
+      <div>
+        <strong>${esc(row.option_label)}</strong>
+        <p class="admin-muted">Edit stock, price, display order, and storefront behavior for this vial.</p>
+      </div>
+      <button class="admin-small-btn" data-action="save-inventory" type="button">Save vial</button>
+    </div>
+    <div class="inventory-fields inventory-fields-variant">
+      <label><span>On hand</span><input data-inventory="stock" type="number" min="0" step="1" value="${esc(row.stock)}"></label>
+      <label><span>Price ($)</span><input data-inventory="price" type="number" min="0" step="0.01" value="${row.price === null ? "" : esc(row.price)}" placeholder="Required to sell"></label>
+      <label><span>Availability</span><select data-inventory="availability_status">
+        ${["auto", "out_of_stock", "coming_soon", "limited", "hidden"].map(v => `<option value="${v}" ${row.availability_status === v ? "selected" : ""}>${v.replaceAll("_", " ")}</option>`).join("")}
+      </select></label>
+      <label><span>Low at</span><input data-inventory="low_stock_threshold" type="number" min="0" step="1" value="${esc(row.low_stock_threshold)}"></label>
+      <label><span>Display order</span><input data-inventory="sort_order" type="number" step="1" value="${esc(row.sort_order || 0)}"></label>
+      <label class="inventory-check"><input data-inventory="enabled" type="checkbox" ${row.enabled ? "checked" : ""}><span>Vial enabled</span></label>
+      <label class="inventory-check"><input data-inventory="show_stock_count" type="checkbox" ${row.show_stock_count ? "checked" : ""}><span>Show count</span></label>
+    </div>
   </article>`;
 }
 
