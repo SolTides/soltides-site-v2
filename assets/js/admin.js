@@ -167,7 +167,7 @@ function variantCreator(products) {
 }
 
 async function saveInventoryRow(button) {
-  const row = button.closest(".inventory-row");
+  const row = button.closest(".inventory-editor");
   if (!row) return;
   const isVariant = row.dataset.kind === "variant";
   const body = {
