@@ -3,6 +3,10 @@ const { supabaseFetch } = require("./lib/supabase-rest");
 
 const STATUSES = new Set(["auto", "out_of_stock", "coming_soon", "limited", "hidden"]);
 
+function isMissingInventoryPriceColumn(error) {
+  return /inventory\.price|column\s+price|price does not exist|PGRST/i.test(String(error?.message || error));
+}
+
 exports.handler = async function handler(event) {
   if (event.httpMethod !== "POST") return json(405, { error: "Method not allowed" });
   const token = (event.headers.authorization || event.headers.Authorization || "").replace(/^Bearer\s+/i, "").trim();
@@ -42,9 +46,17 @@ exports.handler = async function handler(event) {
         });
       }
     } else {
-      await supabaseFetch(`inventory?product_id=eq.${encodeURIComponent(body.product_id)}`, {
-        method: "PATCH", token, prefer: "return=minimal", body: values
-      });
+      try {
+        await supabaseFetch(`inventory?product_id=eq.${encodeURIComponent(body.product_id)}`, {
+          method: "PATCH", token, prefer: "return=minimal", body: values
+        });
+      } catch (error) {
+        if (!isMissingInventoryPriceColumn(error)) throw error;
+        const { price: _ignoredPrice, ...legacyValues } = values;
+        await supabaseFetch(`inventory?product_id=eq.${encodeURIComponent(body.product_id)}`, {
+          method: "PATCH", token, prefer: "return=minimal", body: legacyValues
+        });
+      }
     }
     return json(200, { ok: true });
   } catch (error) {
