@@ -1,6 +1,19 @@
 const { json } = require("./lib/http");
 const { supabaseFetch } = require("./lib/supabase-rest");
 
+function isMissingInventoryPriceColumn(error) {
+  return /inventory\.price|column\s+price|price does not exist|PGRST/i.test(String(error?.message || error));
+}
+
+async function readInventoryRows() {
+  try {
+    return await supabaseFetch("inventory?select=product_id,price,stock,availability_status,enabled,low_stock_threshold,show_stock_count&order=product_id", { write: true });
+  } catch (error) {
+    if (!isMissingInventoryPriceColumn(error)) throw error;
+    return await supabaseFetch("inventory?select=product_id,stock,availability_status,enabled,low_stock_threshold,show_stock_count&order=product_id", { write: true });
+  }
+}
+
 function withStockStatus(row) {
   return {
     ...row,
@@ -15,7 +28,7 @@ function withStockStatus(row) {
 exports.handler = async function handler(event) {
   if (event.httpMethod !== "GET") return json(405, { error: "Method not allowed" });
   try {
-    const rows = await supabaseFetch("inventory?select=product_id,price,stock,availability_status,enabled,low_stock_threshold,show_stock_count&order=product_id", { write: true });
+    const rows = await readInventoryRows();
     let variants = [];
     try {
       variants = await supabaseFetch("product_variants?select=product_id,option_label,price,stock,availability_status,enabled,low_stock_threshold,show_stock_count,sort_order&order=product_id,sort_order,option_label", { write: true });
