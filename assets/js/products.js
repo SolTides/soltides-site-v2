@@ -14,6 +14,13 @@ function normalizeKey(key) {
     .replace(/^_+|_+$/g, "");
 }
 
+function canonicalSlug(slug) {
+  const value = String(slug || "").trim().toLowerCase();
+  if (!value) return "";
+  if (["nad+", "nad plus", "nad-plus", "nad_plus"].includes(value)) return "nad-plus";
+  return value;
+}
+
 function normalizeImageOverrideSource(source) {
   if (!source || typeof source !== "object") return new Map();
   if (Array.isArray(source)) {
@@ -157,7 +164,9 @@ async function loadLocalImageOverrides() {
 }
 
 function applyImageOverrides(product, overridesBySlug) {
-  const override = overridesBySlug.get(normalizeKey(product.slug)) || {};
+  const override = overridesBySlug.get(normalizeKey(product.slug))
+    || overridesBySlug.get(normalizeKey(product.id))
+    || {};
   return {
     ...product,
     override_product_image_url: override.product_image_url || override.productImageUrl || "",
@@ -179,7 +188,11 @@ async function loadSheetProducts(fallbackProducts) {
   const rows = parseCSV(text);
   if (rows.length < 2) throw new Error("Sheet has no product rows.");
   const headers = rows[0].map(h => String(h).trim());
-  const bySlug = new Map(fallbackProducts.map(p => [p.slug, p]));
+  const bySlug = new Map();
+  for (const product of fallbackProducts) {
+    bySlug.set(canonicalSlug(product.slug), product);
+    bySlug.set(canonicalSlug(product.id), product);
+  }
   const products = rows.slice(1).map(cells => {
     const r = {};
     headers.forEach((h, i) => {
@@ -187,8 +200,10 @@ async function loadSheetProducts(fallbackProducts) {
       r[h] = value;
       r[normalizeKey(h)] = value;
     });
-    const slug = r.slug || r.product_slug || r.id;
-    const base = bySlug.get(slug) || {};
+    const rawSlug = r.slug || r.product_slug || r.id;
+    const rawBase = bySlug.get(canonicalSlug(rawSlug)) || {};
+    const slug = canonicalSlug(rawSlug || rawBase.slug || rawBase.id);
+    const base = bySlug.get(slug) || rawBase;
     const productImage = firstUrl(
       r.product_image_url,
       r.cloudinary_url,
@@ -203,9 +218,9 @@ async function loadSheetProducts(fallbackProducts) {
     const price = Number(r.price || base.price || 0);
     return {
       ...base,
-      id: slug || base.id || base.slug,
-      slug: slug || base.slug,
-      code: r.product_code || base.code || slug,
+      id: base.id || rawSlug || base.slug,
+      slug: slug || canonicalSlug(base.slug),
+      code: r.product_code || base.code || rawSlug,
       actual: r.peptide_name || base.actual || "",
       spec: r.default_mg || r.mg_options || base.spec || "",
       price,
@@ -216,8 +231,8 @@ async function loadSheetProducts(fallbackProducts) {
       product_image_url: productImage || base.product_image_url || "",
       lab_image_url: labImage || base.lab_image_url || "",
       visible: r.visible || "yes",
-      image: base.image || `${slug}.png`,
-      lab: base.lab || `${slug}-labs.png`,
+      image: base.image || `${canonicalSlug(rawSlug)}.png`,
+      lab: base.lab || `${canonicalSlug(rawSlug)}-labs.png`,
       summary: r.short_description || base.summary || "",
       mg_options: parseMgOptions(r.mg_options, r.default_mg, price),
       overview: base.overview || r.short_description || "Research product supplied for laboratory use only.",
@@ -339,5 +354,6 @@ export function currentProduct() {
     const pathMatch = window.location.pathname.match(/\/products\/([^\/]+)\.html$/);
     if (pathMatch) slug = decodeURIComponent(pathMatch[1]);
   }
-  return state.products.find(p => p.slug === slug);
+  const normalizedSlug = canonicalSlug(slug);
+  return state.products.find(p => canonicalSlug(p.slug) === normalizedSlug || canonicalSlug(p.id) === normalizedSlug);
 }

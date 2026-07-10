@@ -13,6 +13,19 @@ const EMAILJS_ORDER_TEMPLATE_ID = process.env.EMAILJS_ORDER_TEMPLATE_ID || "";
 
 function required(value) { return String(value || "").trim(); }
 
+function isMissingInventoryPriceColumn(error) {
+  return /inventory\.price|column\s+price|price does not exist|PGRST/i.test(String(error?.message || error));
+}
+
+async function readInventoryRowsForCheckout() {
+  try {
+    return await supabaseFetch("inventory?select=product_id,price,stock,availability_status,enabled", { write: true });
+  } catch (error) {
+    if (!isMissingInventoryPriceColumn(error)) throw error;
+    return await supabaseFetch("inventory?select=product_id,stock,availability_status,enabled", { write: true });
+  }
+}
+
 async function verifyTurnstile(token, remoteIp) {
   const secret = required(process.env.TURNSTILE_SECRET_KEY);
   if (!secret) throw new Error("TURNSTILE_SECRET_KEY is not configured.");
@@ -132,7 +145,7 @@ exports.handler = async function handler(event) {
 
     const catalog = await loadCatalog();
     const byId = new Map(catalog.map(p => [p.id || p.slug, p]));
-    const inventoryRows = await supabaseFetch("inventory?select=product_id,price,stock,availability_status,enabled", { write: true });
+    const inventoryRows = await readInventoryRowsForCheckout();
     const inventoryByProduct = new Map((inventoryRows || []).map(row => [row.product_id, row]));
     let inventoryVariants = [];
     try {
