@@ -22,5 +22,9 @@
   "mt-1": {
     "product_image_url": "",
     "lab_image_url": ""
+  },
+  "nad+": {
+    "product_image_url": "https://res.cloudinary.com/dq0loecee/image/upload/v1781826433/NAD_-black_background_rcx7uz.png",
+    "lab_image_url": ""
   }
 }
