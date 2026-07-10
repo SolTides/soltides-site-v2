@@ -115,12 +115,13 @@ function inventoryRow(row) {
     <div class="inventory-editor-top">
       <div>
         <strong>Product settings</strong>
-        <p class="admin-muted">Fallback values apply only when this product has no active vial rows.</p>
+        <p class="admin-muted">Fallback values apply only when this product has no active vial rows. Base price controls the storefront price for non-variant products.</p>
       </div>
       <button class="admin-small-btn" data-action="save-inventory" type="button">Save product</button>
     </div>
     <div class="inventory-fields inventory-fields-base">
       <label><span>Fallback stock</span><input data-inventory="stock" type="number" min="0" step="1" value="${esc(row.stock)}"></label>
+      <label><span>Price ($)</span><input data-inventory="price" type="number" min="0" step="0.01" value="${row.price === null ? "" : esc(row.price)}" placeholder="Uses catalog price if blank"></label>
       <label><span>Availability</span><select data-inventory="availability_status">
         ${["auto", "out_of_stock", "coming_soon", "limited", "hidden"].map(v => `<option value="${v}" ${row.availability_status === v ? "selected" : ""}>${v.replaceAll("_", " ")}</option>`).join("")}
       </select></label>
@@ -174,7 +175,7 @@ async function saveInventoryRow(button) {
     product_id: row.dataset.productId,
     option_label: row.dataset.optionLabel || "",
     stock: Number(row.querySelector('[data-inventory="stock"]').value),
-    price: isVariant ? row.querySelector('[data-inventory="price"]').value : undefined,
+    price: row.querySelector('[data-inventory="price"]')?.value ?? undefined,
     availability_status: row.querySelector('[data-inventory="availability_status"]').value,
     low_stock_threshold: Number(row.querySelector('[data-inventory="low_stock_threshold"]').value),
     enabled: row.querySelector('[data-inventory="enabled"]').checked,

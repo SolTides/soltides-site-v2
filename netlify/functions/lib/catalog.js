@@ -37,6 +37,47 @@ function parseMgOptions(mgOptions, defaultMg, price) {
   });
 }
 
+function normalizeKey(key) {
+  return String(key || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function imageOverrideFiles() {
+  return [
+    path.join(process.cwd(), "assets", "product-image-overrides.json"),
+    path.join(__dirname, "..", "..", "..", "assets", "product-image-overrides.json")
+  ];
+}
+
+function loadImageOverrides() {
+  for (const file of imageOverrideFiles()) {
+    try {
+      if (!fs.existsSync(file)) continue;
+      const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
+      if (parsed && typeof parsed === "object") return parsed;
+    } catch (_) {}
+  }
+  return {};
+}
+
+function applyImageOverrides(product, overrides) {
+  const override = overrides[normalizeKey(product.slug)] || overrides[product.slug] || {};
+  return {
+    ...product,
+    product_image_url: override.product_image_url || override.productImageUrl || product.product_image_url || "",
+    cloudinary_url: override.cloudinary_url || override.cloudinaryUrl || product.cloudinary_url || "",
+    cloudinary_image_url: override.cloudinary_image_url || override.cloudinaryImageUrl || product.cloudinary_image_url || "",
+    image_url: override.image_url || override.imageUrl || product.image_url || "",
+    lab_image_url: override.lab_image_url || override.labImageUrl || product.lab_image_url || "",
+    lab_url: override.lab_url || override.labUrl || product.lab_url || "",
+    coa_url: override.coa_url || override.coaUrl || product.coa_url || "",
+    testing_url: override.testing_url || override.testingUrl || product.testing_url || ""
+  };
+}
+
 function localProducts() {
   const possible = [
     path.join(process.cwd(), "assets", "products.json"),
@@ -91,8 +132,14 @@ async function sheetProducts(fallbackProducts) {
 
 async function loadCatalog() {
   const local = localProducts();
-  try { return await sheetProducts(local); }
-  catch (e) { console.warn("Using local product catalog fallback:", e.message); return local; }
+  const overrides = loadImageOverrides();
+  try {
+    return (await sheetProducts(local)).map(product => applyImageOverrides(product, overrides));
+  }
+  catch (e) {
+    console.warn("Using local product catalog fallback:", e.message);
+    return local.map(product => applyImageOverrides(product, overrides));
+  }
 }
 
 function stockNumber(p) {
