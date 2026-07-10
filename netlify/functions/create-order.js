@@ -132,6 +132,8 @@ exports.handler = async function handler(event) {
 
     const catalog = await loadCatalog();
     const byId = new Map(catalog.map(p => [p.id || p.slug, p]));
+    const inventoryRows = await supabaseFetch("inventory?select=product_id,price,stock,availability_status,enabled", { write: true });
+    const inventoryByProduct = new Map((inventoryRows || []).map(row => [row.product_id, row]));
     let inventoryVariants = [];
     try {
       inventoryVariants = await supabaseFetch("product_variants?select=product_id,option_label,price,stock,availability_status,enabled", { write: true });
@@ -167,7 +169,14 @@ exports.handler = async function handler(event) {
         }
         option = { label: variant.option_label, price: Number(variant.price) };
       } else {
-        option = (product.mg_options || []).find(o => String(o.label) === mgLabel) || (product.mg_options || [])[0];
+        const fallbackOption = (product.mg_options || []).find(o => String(o.label) === mgLabel) || (product.mg_options || [])[0];
+        const inventoryRow = inventoryByProduct.get(id);
+        const inventoryPrice = inventoryRow?.price === null || inventoryRow?.price === undefined || inventoryRow?.price === ""
+          ? null
+          : Number(inventoryRow.price);
+        option = fallbackOption
+          ? { ...fallbackOption, price: Number.isFinite(inventoryPrice) ? inventoryPrice : Number(fallbackOption.price ?? product.price) }
+          : null;
       }
       if (!option || !Number.isFinite(Number(option.price))) return json(400, { error: "Invalid product option." });
       const unitPrice = Number(option.price);

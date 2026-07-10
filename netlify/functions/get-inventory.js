@@ -15,7 +15,7 @@ function withStockStatus(row) {
 exports.handler = async function handler(event) {
   if (event.httpMethod !== "GET") return json(405, { error: "Method not allowed" });
   try {
-    const rows = await supabaseFetch("inventory?select=product_id,stock,availability_status,enabled,low_stock_threshold,show_stock_count&order=product_id", { write: true });
+    const rows = await supabaseFetch("inventory?select=product_id,price,stock,availability_status,enabled,low_stock_threshold,show_stock_count&order=product_id", { write: true });
     let variants = [];
     try {
       variants = await supabaseFetch("product_variants?select=product_id,option_label,price,stock,availability_status,enabled,low_stock_threshold,show_stock_count,sort_order&order=product_id,sort_order,option_label", { write: true });

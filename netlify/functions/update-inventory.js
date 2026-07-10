@@ -15,12 +15,13 @@ exports.handler = async function handler(event) {
   const rawPrice = body?.price;
   const price = rawPrice === "" || rawPrice === null || rawPrice === undefined ? null : Number(rawPrice);
   if (!body?.product_id || !Number.isInteger(stock) || stock < 0 || !Number.isInteger(threshold) || threshold < 0 || !STATUSES.has(body.availability_status)
-      || (isVariant && price !== null && (!Number.isFinite(price) || price < 0))) {
+      || (price !== null && (!Number.isFinite(price) || price < 0))) {
     return json(400, { error: "Invalid inventory values." });
   }
   try {
     const values = {
       stock,
+      price,
       availability_status: body.availability_status,
       enabled: Boolean(body.enabled),
       low_stock_threshold: threshold,
@@ -29,7 +30,6 @@ exports.handler = async function handler(event) {
     };
 
     if (isVariant) {
-      values.price = price;
       values.sort_order = Number.isInteger(Number(body.sort_order)) ? Number(body.sort_order) : 0;
       if (body.create) {
         await supabaseFetch("product_variants?on_conflict=product_id,option_label", {

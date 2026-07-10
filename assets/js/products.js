@@ -14,8 +14,22 @@ function normalizeKey(key) {
     .replace(/^_+|_+$/g, "");
 }
 
+function normalizeImageOverrideSource(source) {
+  if (!source || typeof source !== "object") return new Map();
+  if (Array.isArray(source)) {
+    return new Map(source
+      .filter(entry => entry && typeof entry === "object")
+      .map(entry => [normalizeKey(entry.slug || entry.id || entry.code), entry]));
+  }
+  return new Map(Object.entries(source).map(([slug, entry]) => [normalizeKey(slug), entry || {}]));
+}
+
 export function productImageUrl(p) {
   return firstUrl(
+    p?.override_product_image_url,
+    p?.override_cloudinary_url,
+    p?.override_cloudinary_image_url,
+    p?.override_image_url,
     p?.product_image_url,
     p?.cloudinary_url,
     p?.cloudinary_image_url,
@@ -128,6 +142,33 @@ function parseMgOptions(mgOptions, defaultMg, price) {
 async function loadLocalProducts() {
   const res = await fetch(`${state.pathPrefix}assets/products.json`, { cache: "no-store" });
   return await res.json();
+}
+
+function priceNumber(value) {
+  if (value === "" || value === null || value === undefined) return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+async function loadLocalImageOverrides() {
+  const res = await fetch(`${state.pathPrefix}assets/product-image-overrides.json`, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Image override fetch failed ${res.status}`);
+  return await res.json();
+}
+
+function applyImageOverrides(product, overridesBySlug) {
+  const override = overridesBySlug.get(normalizeKey(product.slug)) || {};
+  return {
+    ...product,
+    override_product_image_url: override.product_image_url || override.productImageUrl || "",
+    override_cloudinary_url: override.cloudinary_url || override.cloudinaryUrl || "",
+    override_cloudinary_image_url: override.cloudinary_image_url || override.cloudinaryImageUrl || "",
+    override_image_url: override.image_url || override.imageUrl || "",
+    override_lab_image_url: override.lab_image_url || override.labImageUrl || "",
+    override_lab_url: override.lab_url || override.labUrl || "",
+    override_coa_url: override.coa_url || override.coaUrl || "",
+    override_testing_url: override.testing_url || override.testingUrl || ""
+  };
 }
 
 async function loadSheetProducts(fallbackProducts) {
@@ -243,8 +284,16 @@ async function overlayInventory(products) {
         spec: options.length ? options.map(option => option.label).join(" / ") : product.spec
       };
     }
+    const basePriceOverride = priceNumber(inventory.price);
     return {
       ...product,
+      price: basePriceOverride ?? Number(product.price || 0),
+      mg_options: (product.mg_options || []).length
+        ? (product.mg_options || []).map(option => ({
+          ...option,
+          price: basePriceOverride ?? Number(option.price ?? product.price ?? 0)
+        }))
+        : product.mg_options,
       stock: inventory.stock,
       stock_status: inventory.stock_status,
       show_stock_count: inventory.show_stock_count ? "yes" : "no",
@@ -255,7 +304,13 @@ async function overlayInventory(products) {
 
 export async function loadProducts() {
   let localProducts = [];
+  let imageOverrides = new Map();
   try { localProducts = await loadLocalProducts(); } catch (e) { console.warn("Local product fallback failed", e); }
+  try {
+    imageOverrides = normalizeImageOverrideSource(await loadLocalImageOverrides());
+  } catch (e) {
+    console.warn("Local image overrides unavailable; continuing without them.", e);
+  }
   try {
     state.products = await loadSheetProducts(localProducts);
     console.info("SolTides products loaded from Google Sheet.");
@@ -263,6 +318,7 @@ export async function loadProducts() {
     console.warn("Google Sheet product load failed. Using local fallback.", e);
     state.products = localProducts;
   }
+  state.products = state.products.map(product => applyImageOverrides(product, imageOverrides));
   try {
     state.products = await overlayInventory(state.products);
   } catch (error) {
