@@ -27,14 +27,14 @@ TRANSPARENT = (0, 0, 0, 0)
 PRODUCTS = [
     {
         "filename": "cp10-label.png",
-        "title": "CP10",
+        "title": "CJC-1295 NO DAC\n+ IPAMORELIN",
         "dose": "5mg / 5mg",
         "vial": "3mL VIAL",
         "footer": "FOR RESEARCH USE ONLY",
     },
     {
         "filename": "lc216-label.png",
-        "title": "LC216",
+        "title": "LIPO-B",
         "dose": "10mL",
         "vial": "10mL VIAL",
         "footer": "FOR RESEARCH USE ONLY",
