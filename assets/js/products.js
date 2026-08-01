@@ -247,6 +247,10 @@ async function loadSheetProducts(fallbackProducts) {
     const existing = uniqueBySlug.get(product.slug);
     if (!existing || (!isVisible(existing) && isVisible(product))) uniqueBySlug.set(product.slug, product);
   }
+  for (const product of fallbackProducts) {
+    const slug = canonicalSlug(product.slug || product.id);
+    if (slug && !uniqueBySlug.has(slug)) uniqueBySlug.set(slug, { ...product, slug });
+  }
   return [...uniqueBySlug.values()];
 }
 
