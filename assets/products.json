@@ -105,6 +105,27 @@
     "quality": "Testing documentation helps support product identification, purity review, and lot traceability. When available, the lab report for this blend will appear in the Lab Results section."
   },
   {
+    "id": "cp10",
+    "slug": "cp10",
+    "code": "CP10",
+    "actual": "CJC-1295 NO DAC + Ipamorelin",
+    "spec": "5mg / 5mg",
+    "price": 65,
+    "image": "cp10.png",
+    "lab": "cp10-labs.png",
+    "summary": "CP10 is a two-component research peptide blend supplied as CJC-1295 NO DAC 5mg plus Ipamorelin 5mg in a 3mL vial.",
+    "mg_options": [
+      {
+        "label": "5mg / 5mg",
+        "price": 65
+      }
+    ],
+    "overview": "CP10 is the SolTides catalog name for a two-component research peptide blend containing CJC-1295 NO DAC and Ipamorelin. This listing is supplied in a labeled 5mg / 5mg format for controlled laboratory research use only.",
+    "specs": "Catalog name: CP10. Blend: CJC-1295 NO DAC + Ipamorelin. Listed amount: 5mg / 5mg. Vial format: 3mL vial. Form: lyophilized research peptide blend. Intended setting: controlled laboratory research only.",
+    "storage": "Store sealed in a cool, dry, light-protected environment. Avoid repeated temperature changes, direct sunlight, moisture exposure, and unnecessary handling before laboratory use.",
+    "quality": "Blend review may include identity verification, purity review, label accuracy, and lot traceability. When available, lot-specific documentation will appear in the Lab Results section."
+  },
+  {
     "id": "mt-1",
     "slug": "mt-1",
     "code": "MT-1",
@@ -124,6 +145,27 @@
     "specs": "Catalog name: MT-1. Peptide name: Melanotan I. Listed amount: 10mg. Vial format: 3mL vial. Form: lyophilized research peptide. Intended setting: controlled laboratory research only.",
     "storage": "Keep the vial sealed and protected from heat, direct light, and moisture. Store under stable laboratory conditions and avoid unnecessary handling before research use.",
     "quality": "Quality review supports confidence in identity, purity, labeling, and lot traceability. Any available lab documentation will be shown in the Lab Results section for this product."
+  },
+  {
+    "id": "lc216",
+    "slug": "lc216",
+    "code": "LC216",
+    "actual": "Lipo-B",
+    "spec": "10mL",
+    "price": 55,
+    "image": "lc216.png",
+    "lab": "lc216-labs.png",
+    "summary": "LC216 is Lipo-B supplied as a 10mL research liquid in a sealed vial.",
+    "mg_options": [
+      {
+        "label": "10mL",
+        "price": 55
+      }
+    ],
+    "overview": "LC216 is the SolTides catalog name for Lipo-B. This listing is supplied as a 10mL research liquid in a sealed vial for controlled laboratory and analytical use only.",
+    "specs": "Catalog name: LC216. Compound name: Lipo-B. Listed amount: 10mL. Vial format: 10mL vial. Form: research liquid compound. Intended setting: controlled laboratory research only.",
+    "storage": "Store sealed in a cool, dry, light-protected environment. Avoid excessive heat, direct sunlight, repeated temperature changes, and unnecessary handling before laboratory use.",
+    "quality": "Quality review may include identity support, labeling review, packaging inspection, and lot traceability. When available, supporting documentation will appear in the Lab Results section."
   },
   {
     "id": "nad+",

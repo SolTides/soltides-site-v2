@@ -1,5 +1,6 @@
 const { json, readJson } = require("./lib/http");
 const { supabaseFetch } = require("./lib/supabase-rest");
+const { assertAdmin } = require("./lib/admin-auth");
 
 const STATUSES = new Set(["auto", "out_of_stock", "coming_soon", "limited", "hidden"]);
 
@@ -9,8 +10,6 @@ function isMissingInventoryPriceColumn(error) {
 
 exports.handler = async function handler(event) {
   if (event.httpMethod !== "POST") return json(405, { error: "Method not allowed" });
-  const token = (event.headers.authorization || event.headers.Authorization || "").replace(/^Bearer\s+/i, "").trim();
-  if (!token) return json(401, { error: "Missing admin session." });
   const body = readJson(event);
   const stock = Number(body?.stock);
   const threshold = Number(body?.low_stock_threshold);
@@ -23,7 +22,9 @@ exports.handler = async function handler(event) {
     return json(400, { error: "Invalid inventory values." });
   }
   try {
+    await assertAdmin(event.headers);
     const values = {
+      product_id: body.product_id,
       stock,
       price,
       availability_status: body.availability_status,
@@ -35,26 +36,28 @@ exports.handler = async function handler(event) {
 
     if (isVariant) {
       values.sort_order = Number.isInteger(Number(body.sort_order)) ? Number(body.sort_order) : 0;
-      if (body.create) {
-        await supabaseFetch("product_variants?on_conflict=product_id,option_label", {
-          method: "POST", token, prefer: "resolution=merge-duplicates,return=minimal",
-          body: { product_id: body.product_id, option_label: optionLabel, ...values }
-        });
-      } else {
-        await supabaseFetch(`product_variants?product_id=eq.${encodeURIComponent(body.product_id)}&option_label=eq.${encodeURIComponent(optionLabel)}`, {
-          method: "PATCH", token, prefer: "return=minimal", body: values
-        });
-      }
+      await supabaseFetch("product_variants?on_conflict=product_id,option_label", {
+        method: "POST",
+        write: true,
+        prefer: "resolution=merge-duplicates,return=minimal",
+        body: { ...values, option_label: optionLabel }
+      });
     } else {
       try {
-        await supabaseFetch(`inventory?product_id=eq.${encodeURIComponent(body.product_id)}`, {
-          method: "PATCH", token, prefer: "return=minimal", body: values
+        await supabaseFetch("inventory?on_conflict=product_id", {
+          method: "POST",
+          write: true,
+          prefer: "resolution=merge-duplicates,return=minimal",
+          body: values
         });
       } catch (error) {
         if (!isMissingInventoryPriceColumn(error)) throw error;
         const { price: _ignoredPrice, ...legacyValues } = values;
-        await supabaseFetch(`inventory?product_id=eq.${encodeURIComponent(body.product_id)}`, {
-          method: "PATCH", token, prefer: "return=minimal", body: legacyValues
+        await supabaseFetch("inventory?on_conflict=product_id", {
+          method: "POST",
+          write: true,
+          prefer: "resolution=merge-duplicates,return=minimal",
+          body: legacyValues
         });
       }
     }
