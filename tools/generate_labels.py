@@ -37,7 +37,7 @@ PRODUCTS = [
         "dose": "60mg",
         "vial": "3mL VIAL",
         "template": "clear-3ml-vial-base.png",
-        "region": (300, 627, 724, 1222),
+        "region": (320, 536, 704, 1200),
     },
     {
         "image": "slp-2.png",
@@ -46,7 +46,7 @@ PRODUCTS = [
         "dose": "15mg",
         "vial": "3mL VIAL",
         "template": "clear-3ml-vial-base.png",
-        "region": (300, 627, 724, 1222),
+        "region": (320, 536, 704, 1200),
     },
     {
         "image": "tesamorelin.png",
@@ -55,7 +55,7 @@ PRODUCTS = [
         "dose": "10mg",
         "vial": "3mL VIAL",
         "template": "clear-3ml-vial-base.png",
-        "region": (300, 627, 724, 1222),
+        "region": (320, 536, 704, 1200),
     },
     {
         "image": "klow-blend.png",
@@ -64,7 +64,7 @@ PRODUCTS = [
         "dose": "50mg / 10mg / 10mg / 10mg",
         "vial": "3mL VIAL",
         "template": "clear-3ml-vial-base.png",
-        "region": (300, 627, 724, 1222),
+        "region": (320, 536, 704, 1200),
     },
     {
         "image": "bpc-157-tb-500.png",
@@ -73,7 +73,7 @@ PRODUCTS = [
         "dose": "10mg / 10mg",
         "vial": "3mL VIAL",
         "template": "clear-3ml-vial-base.png",
-        "region": (300, 627, 724, 1222),
+        "region": (320, 536, 704, 1200),
     },
     {
         "image": "mt-1.png",
@@ -82,7 +82,7 @@ PRODUCTS = [
         "dose": "10mg",
         "vial": "3mL VIAL",
         "template": "clear-3ml-vial-base.png",
-        "region": (300, 627, 724, 1222),
+        "region": (320, 536, 704, 1200),
     },
     {
         "image": "mots-c.png",
@@ -91,7 +91,7 @@ PRODUCTS = [
         "dose": "10mg",
         "vial": "3mL VIAL",
         "template": "clear-3ml-vial-base.png",
-        "region": (300, 627, 724, 1222),
+        "region": (320, 536, 704, 1200),
     },
     {
         "image": "cp10.png",
@@ -100,7 +100,7 @@ PRODUCTS = [
         "dose": "5mg / 5mg",
         "vial": "3mL VIAL",
         "template": "clear-3ml-vial-base.png",
-        "region": (300, 627, 724, 1222),
+        "region": (320, 536, 704, 1200),
     },
     {
         "image": "nad-plus.png",
@@ -109,7 +109,7 @@ PRODUCTS = [
         "dose": "500mg",
         "vial": "10mL VIAL",
         "template": "amber-10ml-vial-base.png",
-        "region": (294, 610, 730, 1189),
+        "region": (290, 554, 735, 1198),
     },
     {
         "image": "lc216.png",
@@ -118,7 +118,7 @@ PRODUCTS = [
         "dose": "10mL",
         "vial": "10mL VIAL",
         "template": "amber-10ml-vial-base.png",
-        "region": (294, 610, 730, 1189),
+        "region": (290, 554, 735, 1198),
     },
 ]
 
@@ -279,20 +279,20 @@ def front_art(product: dict[str, object], width: int, height: int, logo: Image.I
 
 
 def cylindrical_wrap(art: Image.Image) -> Image.Image:
-    """Compress artwork at the edges and add a subtle curved baseline."""
+    """Apply subtle real-world label curvature without stretching the typography."""
     src = np.asarray(art.convert("RGBA"), dtype=np.float32)
     height, width, _ = src.shape
     out = np.zeros_like(src)
     for x in range(width):
         xn = (2.0 * x / max(1, width - 1)) - 1.0
-        source_normal = np.arcsin(np.clip(xn, -1.0, 1.0)) / (np.pi / 2.0)
+        source_normal = xn + 0.08 * (xn**3 - xn)
         sx = (source_normal + 1.0) * 0.5 * (width - 1)
         x0 = int(np.floor(sx))
         x1 = min(width - 1, x0 + 1)
         blend = sx - x0
         column = src[:, x0, :] * (1.0 - blend) + src[:, x1, :] * blend
-        shift = int(round(4.0 * xn * xn))
-        shade = 0.84 + 0.16 * np.sqrt(max(0.0, 1.0 - xn * xn))
+        shift = int(round(1.5 * xn * xn))
+        shade = 0.94 + 0.06 * np.sqrt(max(0.0, 1.0 - xn * xn))
         column[:, :3] *= shade
         if shift:
             out[shift:, x, :] = column[: height - shift, :]
