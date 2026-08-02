@@ -176,7 +176,7 @@
     "price": 100,
     "image": "nad-plus.png",
     "lab": "nad-plus-labs.png",
-    "summary": "NAD+ is supplied as a 500mg lyophilized research compound in a 3mL vial.",
+    "summary": "NAD+ is supplied as a 500mg lyophilized research compound in an amber 10mL vial.",
     "mg_options": [
       {
         "label": "500mg",
@@ -184,7 +184,7 @@
       }
     ],
     "overview": "NAD+ is a SolTides catalog entry for laboratory research use only. It is supplied as a 500mg lyophilized vial intended for controlled research environments.",
-    "specs": "Catalog name: NAD+. Listed amount: 500mg. Vial format: 3mL vial. Form: lyophilized research compound. Intended setting: controlled laboratory research only.",
+    "specs": "Catalog name: NAD+. Listed amount: 500mg. Vial format: amber 10mL vial. Form: lyophilized research compound. Intended setting: controlled laboratory research only.",
     "storage": "Store sealed in a cool, dry, light-protected environment. Avoid heat, direct sunlight, moisture exposure, and repeated temperature changes.",
     "quality": "Testing documentation helps support identity, purity, and lot quality. When a lot-specific lab report is available, it will be shown in the Lab Results section."
   }
