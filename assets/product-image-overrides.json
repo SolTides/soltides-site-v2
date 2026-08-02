@@ -1,42 +1,46 @@
 {
   "slp-3": {
-    "product_image_url": "",
+    "product_image_url": "https://res.cloudinary.com/dq0loecee/image/upload/v1785632413/Soltides/Products/Premium-Vials/slp-3-60mg.png",
     "lab_image_url": ""
   },
   "slp-2": {
-    "product_image_url": "",
+    "product_image_url": "https://res.cloudinary.com/dq0loecee/image/upload/v1785632414/Soltides/Products/Premium-Vials/slp-2-15mg.png",
     "lab_image_url": ""
   },
   "tesamorelin": {
-    "product_image_url": "",
+    "product_image_url": "https://res.cloudinary.com/dq0loecee/image/upload/v1785632415/Soltides/Products/Premium-Vials/tesamorelin-10mg.png",
     "lab_image_url": ""
   },
   "klow-blend": {
-    "product_image_url": "",
+    "product_image_url": "https://res.cloudinary.com/dq0loecee/image/upload/v1785632416/Soltides/Products/Premium-Vials/klow-blend.png",
     "lab_image_url": ""
   },
   "bpc-157-tb-500": {
-    "product_image_url": "",
+    "product_image_url": "https://res.cloudinary.com/dq0loecee/image/upload/v1785632417/Soltides/Products/Premium-Vials/bpc-157-tb-500-blend.png",
     "lab_image_url": ""
   },
   "cp10": {
-    "product_image_url": "https://res.cloudinary.com/dq0loecee/image/upload/v1785628069/cp10-cjc-1295-no-dac-ipamorelin-premium-vial.png",
+    "product_image_url": "https://res.cloudinary.com/dq0loecee/image/upload/v1785632421/Soltides/Products/Premium-Vials/cp10-cjc-1295-no-dac-ipamorelin.png",
     "lab_image_url": ""
   },
   "mt-1": {
-    "product_image_url": "",
+    "product_image_url": "https://res.cloudinary.com/dq0loecee/image/upload/v1785632418/Soltides/Products/Premium-Vials/mt-1-10mg.png",
     "lab_image_url": ""
   },
   "lc216": {
-    "product_image_url": "https://res.cloudinary.com/dq0loecee/image/upload/v1785628096/lc216-lipo-b-premium-vial.png",
+    "product_image_url": "https://res.cloudinary.com/dq0loecee/image/upload/v1785632422/Soltides/Products/Premium-Vials/lc216-lipo-b.png",
     "lab_image_url": ""
   },
   "nad+": {
-    "product_image_url": "https://res.cloudinary.com/dq0loecee/image/upload/v1781826433/NAD_-black_background_rcx7uz.png",
+    "product_image_url": "https://res.cloudinary.com/dq0loecee/image/upload/v1785632419/Soltides/Products/Premium-Vials/nad-plus-500mg.png",
     "lab_image_url": ""
   },
   "nad-plus": {
-    "product_image_url": "https://res.cloudinary.com/dq0loecee/image/upload/v1781826433/NAD_-black_background_rcx7uz.png",
+    "product_image_url": "https://res.cloudinary.com/dq0loecee/image/upload/v1785632419/Soltides/Products/Premium-Vials/nad-plus-500mg.png",
+    "lab_image_url": ""
+  },
+  "mots-c": {
+    "product_image_url": "https://res.cloudinary.com/dq0loecee/image/upload/v1785632420/Soltides/Products/Premium-Vials/mots-c-10mg.png",
     "lab_image_url": ""
   }
 }
