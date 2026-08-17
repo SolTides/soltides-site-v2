@@ -154,6 +154,7 @@
     "spec": "10mL",
     "price": 55,
     "image": "lc216.png",
+    "product_image_url": "https://res.cloudinary.com/dq0loecee/image/upload/v1786927406/soltides-premium-vials/lc216-lipo-b.png",
     "lab": "lc216-labs.png",
     "summary": "LC216 is Lipo-B supplied as a 10mL research liquid in a sealed vial.",
     "mg_options": [
